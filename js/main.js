@@ -341,60 +341,15 @@
     });
   }
 
-  /* ── GALLERY MOSAIC + LIGHTBOX ─────────────────────────────── */
+  /* ── GALLERY MARQUEE + LIGHTBOX ────────────────────────────── */
   function initGallery() {
-    var grid     = document.getElementById('gallery-mosaic');
+    var gallery  = document.getElementById('gallery-mosaic');
     var lightbox = document.getElementById('lightbox');
-    if (!grid) return;
+    if (!gallery) return;
 
-    var cells = grid.querySelectorAll('.gi');
-    var imgs  = grid.querySelectorAll('.gi img');
-    if (!cells.length) return;
+    var items = gallery.querySelectorAll('.mq-item');
+    if (!items.length) return;
 
-    var sets = [
-      ['galeria-01.jpg', 'galeria-03.jpg', 'galeria-04.jpg', 'galeria-05.jpg', 'galeria-06.jpg', 'galeria-07.jpg'],
-      ['galeria-02.jpg', 'galeria-08.jpg', 'galeria-09.jpg', 'galeria-02.jpg', 'galeria-08.jpg', 'galeria-09.jpg']
-    ];
-
-    /* Preload every image so swaps are instant */
-    for (var n = 1; n <= 9; n++) {
-      var pre = new Image();
-      pre.src = 'assets/galeria-' + (n < 10 ? '0' + n : n) + '.jpg';
-    }
-
-    var currentSet  = 0;
-    var rotateTimer = null;
-    var INTERVAL_MS = 5000;
-    var FADE_MS     = 500;
-
-    function applySet(setIdx) {
-      var arr = sets[setIdx];
-      imgs.forEach(function (img, i) {
-        img.src = 'assets/' + arr[i];
-      });
-    }
-
-    function rotate() {
-      currentSet = (currentSet + 1) % sets.length;
-      grid.classList.add('is-fading');
-      setTimeout(function () {
-        applySet(currentSet);
-        grid.classList.remove('is-fading');
-      }, FADE_MS);
-    }
-
-    function start() {
-      stop();
-      rotateTimer = setInterval(rotate, INTERVAL_MS);
-    }
-    function stop() {
-      if (rotateTimer) { clearInterval(rotateTimer); rotateTimer = null; }
-    }
-
-    grid.addEventListener('mouseenter', stop);
-    grid.addEventListener('mouseleave', start);
-
-    /* Lightbox */
     function openLightbox(src, alt) {
       if (!lightbox) return;
       var img = lightbox.querySelector('.lightbox__img');
@@ -403,7 +358,6 @@
       lightbox.classList.add('is-open');
       lightbox.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
-      stop();
     }
     function closeLightbox() {
       if (!lightbox) return;
@@ -411,19 +365,18 @@
       lightbox.setAttribute('aria-hidden', 'true');
       lightbox.querySelector('.lightbox__img').src = '';
       document.body.style.overflow = '';
-      start();
     }
 
-    cells.forEach(function (cell) {
-      cell.addEventListener('click', function () {
-        var img = cell.querySelector('img');
-        if (img) openLightbox(img.src, img.alt);
+    items.forEach(function (item) {
+      item.addEventListener('click', function () {
+        var img = item.querySelector('img');
+        if (img) openLightbox(img.src, img.getAttribute('alt') || 'Proyecto Steel Paint');
       });
-      cell.addEventListener('keydown', function (e) {
+      item.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          var img = cell.querySelector('img');
-          if (img) openLightbox(img.src, img.alt);
+          var img = item.querySelector('img');
+          if (img) openLightbox(img.src, img.getAttribute('alt') || 'Proyecto Steel Paint');
         }
       });
     });
@@ -440,8 +393,6 @@
         }
       });
     }
-
-    start();
   }
 
   /* ── INIT ──────────────────────────────────────────────────── */
