@@ -178,7 +178,7 @@
 
     var idleTimer = null;
     var lastCalc  = null;
-    var IDLE_MS   = 30 * 60 * 1000; /* 30 min */
+    var IDLE_MS   = 1 * 60 * 1000; /* 1 min — TESTING (volver a 30*60*1000) */
 
     function getLead() {
       try { return JSON.parse(localStorage.getItem('sp_lead')); }
