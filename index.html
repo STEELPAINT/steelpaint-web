@@ -39,6 +39,14 @@
     "serviceType":"Maquila de pintura electrostática en polvo"
   }
   </script>
+  <style>
+    .client-box  { background: #fff; border: 1px solid var(--border); border-radius: var(--rl); padding: 0.65rem 2rem; display: flex; align-items: center; justify-content: center; }
+    .client-logo { height: 54px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.3s ease; }
+    .client-box:hover .client-logo { filter: grayscale(0); }
+    .brand-box   { background: #fff; border: 1px solid var(--border); border-radius: var(--rl); padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: center; }
+    .brand-logo  { height: 48px; object-fit: contain; filter: grayscale(1); transition: filter 0.3s ease; }
+    .brand-box:hover .brand-logo { filter: grayscale(0); }
+  </style>
 </head>
 <body>
 
@@ -82,6 +90,10 @@
      HERO
 ════════════════════════════════════════════════ -->
 <section class="hero" aria-label="Bienvenida">
+  <video autoplay muted loop playsinline preload="auto" aria-hidden="true"
+         style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.3;pointer-events:none;">
+    <source src="assets/video-steelpaint.mov" type="video/mp4">
+  </video>
   <canvas id="hero-canvas" aria-hidden="true"></canvas>
   <div class="hero__overlay"></div>
   <div class="wrap">
@@ -123,11 +135,11 @@
   <div class="wrap">
     <p class="clients__label">Empresas que confían su producción a Steel Paint</p>
     <div class="clients__logos">
-      <div class="client-pill">John Deere</div>
-      <div class="client-pill">DeAcero</div>
-      <div class="client-pill">Metalsa</div>
-      <div class="client-pill">Home Depot</div>
-      <div class="client-pill">Allen</div>
+      <div class="client-box"><img class="client-logo" src="assets/clientes/johndeere.png" alt="John Deere" loading="lazy"></div>
+      <div class="client-box"><img class="client-logo" src="assets/clientes/de%20acero.png" alt="DeAcero" loading="lazy"></div>
+      <div class="client-box"><img class="client-logo" src="assets/clientes/metalsa.png" alt="Metalsa" loading="lazy"></div>
+      <div class="client-box"><img class="client-logo" src="assets/clientes/homedepot.png" alt="Home Depot" loading="lazy"></div>
+      <div class="client-box"><img class="client-logo" src="assets/clientes/tesla.png" alt="Tesla" loading="lazy"></div>
     </div>
   </div>
 </div>
@@ -306,11 +318,11 @@
       <p>Solo utilizamos pinturas en polvo de proveedores certificados. Cada marca tiene fichas técnicas disponibles para validación del cliente.</p>
     </div>
     <div class="brands__row reveal">
-      <div class="brand-box">AkzoNobel</div>
-      <div class="brand-box">Axalta</div>
-      <div class="brand-box">Sherwin Williams</div>
-      <div class="brand-box">Tiger</div>
-      <div class="brand-box">Vitracoat</div>
+      <div class="brand-box"><img class="brand-logo" src="assets/Pinturas/AkzoNobel_logo.png" alt="AkzoNobel" loading="lazy" style="max-width:120px;"></div>
+      <div class="brand-box"><img class="brand-logo" src="assets/Pinturas/axalta.png" alt="Axalta" loading="lazy"></div>
+      <div class="brand-box"><img class="brand-logo" src="assets/Pinturas/sherwing.png" alt="Sherwin Williams" loading="lazy"></div>
+      <div class="brand-box"><img class="brand-logo" src="assets/Pinturas/tiger.jpg" alt="Tiger" loading="lazy"></div>
+      <div class="brand-box"><img class="brand-logo" src="assets/Pinturas/vitracoat.png" alt="Vitracoat" loading="lazy"></div>
     </div>
   </div>
 </section>
