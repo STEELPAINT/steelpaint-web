@@ -352,8 +352,8 @@
     if (!cells.length) return;
 
     var sets = [
-      ['galeria-01.jpg', 'galeria-02.jpg', 'galeria-03.jpg', 'galeria-04.jpg', 'galeria-05.jpg'],
-      ['galeria-06.jpg', 'galeria-07.jpg', 'galeria-08.jpg', 'galeria-09.jpg', 'galeria-01.jpg']
+      ['galeria-01.jpg', 'galeria-02.jpg', 'galeria-03.jpg', 'galeria-04.jpg', 'galeria-05.jpg', 'galeria-06.jpg'],
+      ['galeria-07.jpg', 'galeria-08.jpg', 'galeria-09.jpg', 'galeria-01.jpg', 'galeria-02.jpg', 'galeria-03.jpg']
     ];
 
     /* Preload every image so swaps are instant */

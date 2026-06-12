@@ -594,10 +594,9 @@ p  { color: var(--text-2); line-height: 1.75; }
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: 260px 260px;
+  grid-template-rows: repeat(2, 260px);
   gap: 1rem;
 }
-.gallery-grid .gi:first-child { grid-row: span 2; }
 .gi {
   background: var(--bg-3);
   border-radius: var(--r);
@@ -1148,7 +1147,6 @@ p  { color: var(--text-2); line-height: 1.75; }
   .grid-2, .grid-3, .why-grid, .ind-grid, .blog-grid, .vals-grid, .mv-block { grid-template-columns: 1fr; }
   .process__track         { grid-template-columns: repeat(2,1fr); }
   .gallery-grid           { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
-  .gallery-grid .gi:first-child { grid-row: auto; }
   .gi                     { min-height: 200px; }
   .lightbox__close        { top: 1rem; right: 1rem; }
   .footer__grid           { grid-template-columns: 1fr; gap: 2rem; }
