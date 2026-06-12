@@ -314,13 +314,7 @@
       })
         .then(function (res) {
           if (!res.ok) throw new Error('Request failed');
-          var success = document.querySelector('.form-success');
-          if (success) {
-            form.style.display = 'none';
-            success.classList.add('show');
-          } else {
-            btn.textContent = '¡Mensaje enviado!';
-          }
+          window.location.href = 'gracias.html';
         })
         .catch(function () {
           btn.innerHTML = originalText;
