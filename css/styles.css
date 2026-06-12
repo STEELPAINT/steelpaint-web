@@ -594,7 +594,7 @@ p  { color: var(--text-2); line-height: 1.75; }
 .gallery-marquee {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 25px;
   overflow: hidden;
 }
 .marquee {
@@ -604,7 +604,7 @@ p  { color: var(--text-2); line-height: 1.75; }
 }
 .marquee__track {
   display: flex;
-  gap: 16px;
+  gap: 25px;
   height: 100%;
   width: max-content;
   will-change: transform;
@@ -634,13 +634,14 @@ p  { color: var(--text-2); line-height: 1.75; }
   display: block;
   border-radius: 12px;
 }
-/* shift = 9 items * (380px width + 16px gap) = 3564px */
+/* fila 1: 8 items * (380px + 25px) = 3240px */
 @keyframes marquee-left {
   from { transform: translateX(0); }
-  to   { transform: translateX(-3564px); }
+  to   { transform: translateX(-3240px); }
 }
+/* fila 2: 7 items * (380px + 25px) = 2835px */
 @keyframes marquee-right {
-  from { transform: translateX(-3564px); }
+  from { transform: translateX(-2835px); }
   to   { transform: translateX(0); }
 }
 
