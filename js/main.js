@@ -172,13 +172,75 @@
     var calcWrap  = document.getElementById('calc-wrap');
     var calcForm  = document.getElementById('calc-form');
     var resultDiv = document.getElementById('calc-result');
+    var formalBtn = document.getElementById('btn-formal-quote');
 
     if (!gateForm && !calcForm) return;
+
+    var idleTimer = null;
+    var lastCalc  = null;
+    var IDLE_MS   = 30 * 60 * 1000; /* 30 min */
+
+    function getLead() {
+      try { return JSON.parse(localStorage.getItem('sp_lead')); }
+      catch (e) { return null; }
+    }
+    function leadSent() { return localStorage.getItem('sp_lead_sent') === 'true'; }
+    function markSent() { localStorage.setItem('sp_lead_sent', 'true'); }
+
+    function startIdleTimer() {
+      cancelIdleTimer();
+      if (leadSent()) return;
+      idleTimer = setTimeout(sendLeadOnly, IDLE_MS);
+    }
+    function cancelIdleTimer() {
+      if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
+    }
+
+    function sendLeadOnly() {
+      var lead = getLead();
+      if (!lead || leadSent()) return;
+      fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre:   lead.nombre,
+          empresa:  lead.empresa,
+          telefono: lead.telefono,
+          email:    lead.email
+        })
+      }).then(function (res) {
+        if (res.ok) markSent();
+      }).catch(function () { /* silent */ });
+    }
+
+    function sendLeadWithCalc(calc) {
+      var lead = getLead();
+      if (!lead) return Promise.reject(new Error('No lead'));
+      return fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre:   lead.nombre,
+          empresa:  lead.empresa,
+          telefono: lead.telefono,
+          email:    lead.email,
+          largo:    calc.largo,
+          ancho:    calc.ancho,
+          caras:    calc.caras,
+          piezas:   calc.piezas,
+          total:    calc.total
+        })
+      }).then(function (res) {
+        if (!res.ok) throw new Error('Request failed');
+        markSent();
+      });
+    }
 
     /* If already registered, skip gate */
     if (localStorage.getItem('sp_lead')) {
       if (gateWrap) gateWrap.style.display = 'none';
       if (calcWrap) calcWrap.style.display = 'block';
+      startIdleTimer();
     }
 
     /* Gate submit */
@@ -186,7 +248,6 @@
       gateForm.addEventListener('submit', function (e) {
         e.preventDefault();
         var btn  = gateForm.querySelector('[type="submit"]');
-        var originalText = btn.innerHTML;
         btn.textContent = 'Verificando...';
         btn.disabled    = true;
 
@@ -198,32 +259,16 @@
           ts:       new Date().toISOString()
         };
         localStorage.setItem('sp_lead', JSON.stringify(lead));
+        localStorage.removeItem('sp_lead_sent');
 
-        fetch('/api/contact', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            nombre:   lead.nombre,
-            empresa:  lead.empresa,
-            telefono: lead.telefono,
-            email:    lead.email,
-            mensaje:  ''
-          })
-        })
-          .then(function (res) {
-            if (!res.ok) throw new Error('Request failed');
-            if (gateWrap) gateWrap.style.display = 'none';
-            if (calcWrap) {
-              calcWrap.style.display = 'block';
-              calcWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          })
-          .catch(function () {
-            localStorage.removeItem('sp_lead');
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            alert('Hubo un error enviando tus datos. Por favor intenta de nuevo.');
-          });
+        setTimeout(function () {
+          if (gateWrap) gateWrap.style.display = 'none';
+          if (calcWrap) {
+            calcWrap.style.display = 'block';
+            calcWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+          startIdleTimer();
+        }, 700);
       });
     }
 
@@ -242,6 +287,25 @@
       });
     }
 
+    /* Formal quote button */
+    if (formalBtn) {
+      formalBtn.addEventListener('click', function () {
+        if (!lastCalc) return;
+        var originalText = formalBtn.innerHTML;
+        formalBtn.disabled = true;
+        formalBtn.textContent = 'Enviando...';
+        sendLeadWithCalc(lastCalc)
+          .then(function () {
+            formalBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Cotización solicitada';
+          })
+          .catch(function () {
+            formalBtn.innerHTML = originalText;
+            formalBtn.disabled = false;
+            alert('Hubo un error enviando tu solicitud. Por favor intenta de nuevo.');
+          });
+      });
+    }
+
     function calculate() {
       var largo  = parseFloat(val('c-largo'))  || 0;
       var ancho  = parseFloat(val('c-ancho'))  || 0;
@@ -255,6 +319,17 @@
       var areaTotal = areaPieza * piezas;
       var totalEst  = areaTotal  * pm2;
       var costoPieza = areaPieza * pm2;
+
+      /* User calculated — cancel idle auto-send */
+      cancelIdleTimer();
+
+      lastCalc = {
+        largo:  largo,
+        ancho:  ancho,
+        caras:  caras,
+        piezas: piezas,
+        total:  '$' + totalEst.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      };
 
       if (resultDiv) {
         resultDiv.classList.remove('show');

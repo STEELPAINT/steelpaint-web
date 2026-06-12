@@ -3,7 +3,22 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { nombre, empresa, telefono, email, mensaje } = req.body;
+  const { nombre, empresa, telefono, email, mensaje, largo, ancho, caras, piezas, total } = req.body;
+
+  const hasCalc = largo !== undefined && ancho !== undefined;
+  const mensajeSection = mensaje
+    ? `<p><strong>Mensaje:</strong> ${mensaje}</p>`
+    : '';
+  const calcSection = hasCalc
+    ? `
+        <h3 style="margin-top:1.5rem;">Datos de cotización</h3>
+        <p><strong>Largo:</strong> ${largo} m</p>
+        <p><strong>Ancho:</strong> ${ancho} m</p>
+        <p><strong>Caras:</strong> ${caras}</p>
+        <p><strong>Piezas:</strong> ${piezas}</p>
+        <p><strong>Total estimado:</strong> ${total}</p>
+      `
+    : '';
 
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -21,7 +36,8 @@ export default async function handler(req, res) {
         <p><strong>Empresa:</strong> ${empresa}</p>
         <p><strong>Teléfono:</strong> ${telefono}</p>
         <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Mensaje:</strong> ${mensaje}</p>
+        ${mensajeSection}
+        ${calcSection}
       `
     })
   });
