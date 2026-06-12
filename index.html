@@ -326,21 +326,37 @@
       <h2 id="gal-title">Acabados aplicados en proyectos reales</h2>
       <p>Muestra de trabajos terminados: producción en línea, piezas industriales y estructuras de clientes activos.</p>
     </div>
-    <div class="gallery-grid reveal">
-      <div class="gi">
-        <div class="gi-ph"><i class="fa-solid fa-industry"></i>Línea de producción</div>
-      </div>
-      <div class="gi">
-        <div class="gi-ph"><i class="fa-solid fa-cube"></i>Piezas industriales</div>
-      </div>
-      <div class="gi">
-        <div class="gi-ph"><i class="fa-solid fa-fire"></i>Proceso de horneado</div>
-      </div>
-      <div class="gi">
-        <div class="gi-ph"><i class="fa-solid fa-palette"></i>Acabado final</div>
-      </div>
-      <div class="gi">
-        <div class="gi-ph"><i class="fa-solid fa-spray-can"></i>Cabina de pintura</div>
+    <div class="carousel reveal" id="gallery-carousel" aria-label="Galería de proyectos">
+      <div class="carousel__viewport">
+        <div class="carousel__track">
+          <button type="button" class="carousel__slide" data-src="assets/galeria-01.jpg" aria-label="Ampliar imagen 1">
+            <img src="assets/galeria-01.jpg" alt="Proyecto Steel Paint 1" loading="lazy">
+          </button>
+          <button type="button" class="carousel__slide" data-src="assets/galeria-02.jpg" aria-label="Ampliar imagen 2">
+            <img src="assets/galeria-02.jpg" alt="Proyecto Steel Paint 2" loading="lazy">
+          </button>
+          <button type="button" class="carousel__slide" data-src="assets/galeria-03.jpg" aria-label="Ampliar imagen 3">
+            <img src="assets/galeria-03.jpg" alt="Proyecto Steel Paint 3" loading="lazy">
+          </button>
+          <button type="button" class="carousel__slide" data-src="assets/galeria-04.jpg" aria-label="Ampliar imagen 4">
+            <img src="assets/galeria-04.jpg" alt="Proyecto Steel Paint 4" loading="lazy">
+          </button>
+          <button type="button" class="carousel__slide" data-src="assets/galeria-05.jpg" aria-label="Ampliar imagen 5">
+            <img src="assets/galeria-05.jpg" alt="Proyecto Steel Paint 5" loading="lazy">
+          </button>
+          <button type="button" class="carousel__slide" data-src="assets/galeria-06.jpg" aria-label="Ampliar imagen 6">
+            <img src="assets/galeria-06.jpg" alt="Proyecto Steel Paint 6" loading="lazy">
+          </button>
+          <button type="button" class="carousel__slide" data-src="assets/galeria-07.jpg" aria-label="Ampliar imagen 7">
+            <img src="assets/galeria-07.jpg" alt="Proyecto Steel Paint 7" loading="lazy">
+          </button>
+          <button type="button" class="carousel__slide" data-src="assets/galeria-08.jpg" aria-label="Ampliar imagen 8">
+            <img src="assets/galeria-08.jpg" alt="Proyecto Steel Paint 8" loading="lazy">
+          </button>
+          <button type="button" class="carousel__slide" data-src="assets/galeria-09.jpg" aria-label="Ampliar imagen 9">
+            <img src="assets/galeria-09.jpg" alt="Proyecto Steel Paint 9" loading="lazy">
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -540,6 +556,13 @@
     </div>
   </div>
 </footer>
+
+<div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Imagen ampliada">
+  <button type="button" class="lightbox__close" aria-label="Cerrar imagen">
+    <i class="fa-solid fa-xmark"></i>
+  </button>
+  <img class="lightbox__img" src="" alt="">
+</div>
 
 <script src="js/main.js"></script>
 </body>
