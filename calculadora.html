@@ -26,7 +26,7 @@
         <li><a href="nosotros.html">Nosotros</a></li>
         <li><a href="recursos.html">Recursos</a></li>
       </ul>
-      <a href="calculadora.html" class="btn btn-orange nav__cta">Calculadora</a>
+      <a href="index.html#contacto" class="btn btn-primary nav__cta">Contáctanos</a>
       <button class="nav__burger" aria-label="Abrir menú">
         <span></span><span></span><span></span>
       </button>
@@ -52,7 +52,7 @@
     <h1>Calcula el costo de<br>pintar tus piezas</h1>
     <p style="margin-top:1rem;">
       Ingresa las medidas de tu pieza, el número de caras y la cantidad.
-      Obtendrás un estimado basado en nuestro precio de <strong style="color:var(--o-400)">$130 / m²</strong>.
+      Obtendrás un estimado aproximado para tu lote.
     </p>
   </div>
 </section>
@@ -118,6 +118,10 @@
           Tus datos son confidenciales y solo se usan para enviarte el estimado. Consulta nuestro
           <a href="legales.html" style="color:var(--g-500)">aviso de privacidad</a>.
         </p>
+        <label style="display:flex;align-items:flex-start;gap:0.6rem;font-size:0.82rem;color:var(--text-2);margin-bottom:1.25rem;cursor:pointer;">
+          <input type="checkbox" id="g-comms" name="comms" style="margin-top:0.25rem;flex-shrink:0;">
+          <span>Acepto recibir comunicaciones sobre los servicios de Steel Paint.</span>
+        </label>
         <button type="submit" class="btn btn-orange btn-lg" style="width:100%;justify-content:center;">
           <i class="fa-solid fa-unlock"></i> Acceder a la calculadora
         </button>
@@ -130,10 +134,7 @@
     <div class="calc-box">
       <span class="label">Paso 2 de 2 — Calculadora</span>
       <h3>Medidas de tu pieza</h3>
-      <p>
-        Fórmula: <strong style="color:var(--text-1)">Largo × Ancho × Caras × $130/m²</strong>.
-        El resultado es un estimado aproximado, no incluye IVA.
-      </p>
+      <p>El resultado es un estimado aproximado, no incluye IVA.</p>
       <form id="calc-form" novalidate>
         <div class="calc-inputs">
           <div class="calc-field">
@@ -164,23 +165,13 @@
           </div>
         </div>
 
-        <!-- Ejemplo visual -->
-        <div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r);padding:1rem;margin-bottom:1.5rem;">
-          <p style="font-size:0.8rem;color:var(--text-3);margin:0;">
-            <i class="fa-solid fa-lightbulb" style="color:var(--o-400)"></i>
-            <strong style="color:var(--text-2)"> Ejemplo:</strong>
-            Lámina de 1.20 × 0.80 m pintada por ambos lados, lote de 10 piezas:<br>
-            <span style="color:var(--text-1);font-family:var(--f-head);font-size:0.9rem;">1.20 × 0.80 × 2 × $130 × 10 = <strong style="color:var(--g-400)">$2,496.00</strong> estimado</span>
-          </p>
-        </div>
-
         <button type="submit" class="btn btn-orange btn-lg" style="width:100%;justify-content:center;">
           <i class="fa-solid fa-calculator"></i> Calcular estimado
         </button>
       </form>
 
       <!-- RESULTADO -->
-      <div class="calc-result" id="calc-result">
+      <div class="calc-result" id="calc-result" style="margin-top:2rem;">
         <p class="calc-result__label">Estimado aproximado para tu lote</p>
         <div class="calc-result__total" id="calc-total">$0.00</div>
         <p class="calc-result__sub">precio base sin IVA · sujeto a revisión técnica</p>
@@ -206,10 +197,8 @@
 
         <div class="calc-disclaimer">
           <i class="fa-solid fa-circle-info"></i>
-          Este estimado es <strong>aproximado</strong> y está basado en un precio base de $130/m².
-          El precio final puede variar según el tipo de acabado, preparación de superficie,
-          tipo de material y condiciones específicas de la pieza. No incluye IVA.
-          Para un proyecto real, solicita una cotización formal.
+          Este estimado es <strong>aproximado</strong> y puede variar según el tipo de acabado,
+          preparación de superficie y material. No incluye IVA.
         </div>
 
         <div style="display:flex;gap:1rem;flex-wrap:wrap;">
@@ -229,7 +218,7 @@
         ¿Tu pieza tiene geometría compleja, requiere preparación especial o manejas volúmenes muy altos?
       </p>
       <a href="https://wa.me/528118019604" target="_blank" class="btn btn-ghost">
-        <i class="fa-brands fa-whatsapp"></i> Hablar directamente con Marcelo
+        <i class="fa-brands fa-whatsapp"></i> También puedes escribirnos por WhatsApp
       </a>
     </div>
   </div>

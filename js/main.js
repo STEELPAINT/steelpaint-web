@@ -220,11 +220,13 @@
         btn.textContent = 'Verificando...';
         btn.disabled    = true;
 
+        var commsEl = document.getElementById('g-comms');
         var lead = {
           nombre:   val('g-nombre'),
           empresa:  val('g-empresa'),
           telefono: val('g-telefono'),
           email:    val('g-email'),
+          comms:    commsEl ? commsEl.checked : false,
           ts:       new Date().toISOString()
         };
 
