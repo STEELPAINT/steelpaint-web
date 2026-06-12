@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Cotización — Pintura en Polvo | Steel Paint Monterrey</title>
+  <meta name="description" content="Calcula el costo aproximado de pintura electrostática en polvo para tus piezas metálicas. Ingresa medidas y número de piezas. Estimado inmediato.">
+  <meta name="keywords" content="calcular precio pintura en polvo m2 monterrey, cotizacion pintura electrostatica industrial, presupuesto powder coating nuevo leon">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://steel-paint.com.mx/calculadora.html">
+  <link rel="icon" href="assets/logo-white.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav" role="navigation">
+  <div class="wrap">
+    <div class="nav__inner">
+      <a href="index.html"><img src="assets/logo-white.svg" alt="Steel Paint" class="nav__logo"></a>
+      <ul class="nav__links">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="index.html#proceso">¿Qué hacemos?</a></li>
+        <li><a href="index.html#industrias">Industrias</a></li>
+        <li><a href="nosotros.html">Nosotros</a></li>
+        <li><a href="recursos.html">Recursos</a></li>
+      </ul>
+      <a href="calculadora.html" class="btn btn-orange nav__cta">Calculadora</a>
+      <button class="nav__burger" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+<div class="mobile-nav">
+  <span class="mobile-nav__close"><i class="fa fa-times"></i></span>
+  <a href="index.html">Inicio</a>
+  <a href="index.html#proceso">¿Qué hacemos?</a>
+  <a href="nosotros.html">Nosotros</a>
+  <a href="recursos.html">Recursos</a>
+  <a href="index.html#contacto">Contacto</a>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════ -->
+<section class="calc-hero">
+  <div class="wrap">
+    <span class="label" style="justify-content:center;display:flex;margin-bottom:0.75rem;">Herramienta de cotización</span>
+    <h1>Calcula el costo de<br>pintar tus piezas</h1>
+    <p style="margin-top:1rem;">
+      Ingresa las medidas de tu pieza, el número de caras y la cantidad.
+      Obtendrás un estimado basado en nuestro precio de <strong style="color:var(--o-400)">$130 / m²</strong>.
+    </p>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     CÓMO FUNCIONA
+════════════════════════════════════════════════ -->
+<section class="section--alt" style="padding:2.5rem 0;border-bottom:1px solid var(--border)">
+  <div class="wrap">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;text-align:center;">
+      <div style="padding:1.25rem;">
+        <div style="font-size:1.6rem;margin-bottom:0.5rem;">1️⃣</div>
+        <p style="font-size:0.85rem;color:var(--text-2);"><strong style="display:block;color:var(--text-1);margin-bottom:0.2rem;">Registra tus datos</strong>Para recibir el estimado personalizado.</p>
+      </div>
+      <div style="padding:1.25rem;">
+        <div style="font-size:1.6rem;margin-bottom:0.5rem;">2️⃣</div>
+        <p style="font-size:0.85rem;color:var(--text-2);"><strong style="display:block;color:var(--text-1);margin-bottom:0.2rem;">Ingresa las medidas</strong>Largo, ancho, caras y cantidad de piezas.</p>
+      </div>
+      <div style="padding:1.25rem;">
+        <div style="font-size:1.6rem;margin-bottom:0.5rem;">3️⃣</div>
+        <p style="font-size:0.85rem;color:var(--text-2);"><strong style="display:block;color:var(--text-1);margin-bottom:0.2rem;">Obtén tu estimado</strong>Resultado inmediato + opción de cotización formal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     CALCULADORA
+════════════════════════════════════════════════ -->
+<div class="calc-wrap">
+
+  <!-- GATE: Registro previo -->
+  <div id="gate-wrap">
+    <div class="calc-box">
+      <span class="label">Paso 1 de 2</span>
+      <h3>Tus datos de contacto</h3>
+      <p>Completa tus datos para acceder a la calculadora. Te enviaremos el resultado a tu correo.</p>
+      <form id="gate-form" novalidate>
+        <div class="form-row" style="margin-bottom:1rem;">
+          <div class="form-group" style="margin-bottom:0">
+            <label for="g-nombre">Nombre completo *</label>
+            <input type="text" id="g-nombre" name="nombre" placeholder="Juan García" required>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label for="g-empresa">Empresa *</label>
+            <input type="text" id="g-empresa" name="empresa" placeholder="Nombre de tu empresa" required>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:1.5rem;">
+          <div class="form-group" style="margin-bottom:0">
+            <label for="g-telefono">Teléfono *</label>
+            <input type="tel" id="g-telefono" name="telefono" placeholder="81 0000 0000" required>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label for="g-email">Correo electrónico *</label>
+            <input type="email" id="g-email" name="email" placeholder="correo@empresa.com" required>
+          </div>
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-3);margin-bottom:1.25rem;">
+          <i class="fa-solid fa-lock" style="color:var(--g-700)"></i>
+          Tus datos son confidenciales y solo se usan para enviarte el estimado. Consulta nuestro
+          <a href="legales.html" style="color:var(--g-500)">aviso de privacidad</a>.
+        </p>
+        <button type="submit" class="btn btn-orange btn-lg" style="width:100%;justify-content:center;">
+          <i class="fa-solid fa-unlock"></i> Acceder a la calculadora
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- CALCULATOR (visible after registration) -->
+  <div id="calc-wrap" style="display:none;">
+    <div class="calc-box">
+      <span class="label">Paso 2 de 2 — Calculadora</span>
+      <h3>Medidas de tu pieza</h3>
+      <p>
+        Fórmula: <strong style="color:var(--text-1)">Largo × Ancho × Caras × $130/m²</strong>.
+        El resultado es un estimado aproximado, no incluye IVA.
+      </p>
+      <form id="calc-form" novalidate>
+        <div class="calc-inputs">
+          <div class="calc-field">
+            <label for="c-largo">Largo de la pieza (metros)</label>
+            <input type="number" id="c-largo" name="largo" placeholder="1.20" min="0.01" step="0.01" required>
+            <span class="hint">Ejemplo: 1.20 para 1.20 m</span>
+          </div>
+          <div class="calc-field">
+            <label for="c-ancho">Ancho de la pieza (metros)</label>
+            <input type="number" id="c-ancho" name="ancho" placeholder="0.80" min="0.01" step="0.01" required>
+            <span class="hint">Ejemplo: 0.80 para 80 cm</span>
+          </div>
+          <div class="calc-field">
+            <label for="c-caras">Número de caras a pintar</label>
+            <select id="c-caras" name="caras">
+              <option value="1">1 cara</option>
+              <option value="2" selected>2 caras</option>
+              <option value="3">3 caras</option>
+              <option value="4">4 caras</option>
+              <option value="6">6 caras (objeto cúbico)</option>
+            </select>
+            <span class="hint">¿Cuántas caras necesitan pintura?</span>
+          </div>
+          <div class="calc-field">
+            <label for="c-piezas">Número de piezas</label>
+            <input type="number" id="c-piezas" name="piezas" placeholder="100" min="1" step="1" value="1" required>
+            <span class="hint">¿Cuántas piezas en el lote?</span>
+          </div>
+        </div>
+
+        <!-- Ejemplo visual -->
+        <div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r);padding:1rem;margin-bottom:1.5rem;">
+          <p style="font-size:0.8rem;color:var(--text-3);margin:0;">
+            <i class="fa-solid fa-lightbulb" style="color:var(--o-400)"></i>
+            <strong style="color:var(--text-2)"> Ejemplo:</strong>
+            Lámina de 1.20 × 0.80 m pintada por ambos lados, lote de 10 piezas:<br>
+            <span style="color:var(--text-1);font-family:var(--f-head);font-size:0.9rem;">1.20 × 0.80 × 2 × $130 × 10 = <strong style="color:var(--g-400)">$2,496.00</strong> estimado</span>
+          </p>
+        </div>
+
+        <button type="submit" class="btn btn-orange btn-lg" style="width:100%;justify-content:center;">
+          <i class="fa-solid fa-calculator"></i> Calcular estimado
+        </button>
+      </form>
+
+      <!-- RESULTADO -->
+      <div class="calc-result" id="calc-result">
+        <p class="calc-result__label">Estimado aproximado para tu lote</p>
+        <div class="calc-result__total" id="calc-total">$0.00</div>
+        <p class="calc-result__sub">precio base sin IVA · sujeto a revisión técnica</p>
+
+        <div class="calc-breakdown">
+          <div class="bd-item">
+            <span class="val" id="bd-area-p">—</span>
+            <span class="lbl">Área por pieza</span>
+          </div>
+          <div class="bd-item">
+            <span class="val" id="bd-area-t">—</span>
+            <span class="lbl">Área total del lote</span>
+          </div>
+          <div class="bd-item">
+            <span class="val" id="bd-costo-p">—</span>
+            <span class="lbl">Costo por pieza</span>
+          </div>
+          <div class="bd-item">
+            <span class="val" id="bd-piezas">—</span>
+            <span class="lbl">Piezas en el lote</span>
+          </div>
+        </div>
+
+        <div class="calc-disclaimer">
+          <i class="fa-solid fa-circle-info"></i>
+          Este estimado es <strong>aproximado</strong> y está basado en un precio base de $130/m².
+          El precio final puede variar según el tipo de acabado, preparación de superficie,
+          tipo de material y condiciones específicas de la pieza. No incluye IVA.
+          Para un proyecto real, solicita una cotización formal.
+        </div>
+
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+          <a href="https://wa.me/528118019604?text=Hola%2C%20acabo%20de%20usar%20la%20calculadora%20de%20Steel%20Paint%20y%20quiero%20solicitar%20una%20cotización%20formal."
+             target="_blank"
+             class="btn btn-primary btn-lg"
+             style="flex:1;justify-content:center;">
+            <i class="fa-brands fa-whatsapp"></i> Solicitar cotización formal
+          </a>
+          <a href="index.html#contacto" class="btn btn-ghost btn-lg" style="flex:1;justify-content:center;">
+            <i class="fa-solid fa-envelope"></i> Enviar por correo
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Note for complex pieces -->
+    <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--rl);padding:1.75rem;text-align:center;">
+      <p style="font-size:0.9rem;margin-bottom:1rem;">
+        ¿Tu pieza tiene geometría compleja, requiere preparación especial o manejas volúmenes muy altos?
+      </p>
+      <a href="https://wa.me/528118019604" target="_blank" class="btn btn-ghost">
+        <i class="fa-brands fa-whatsapp"></i> Hablar directamente con Marcelo
+      </a>
+    </div>
+  </div>
+
+</div><!-- /calc-wrap -->
+
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <img src="assets/logo-white.svg" alt="Steel Paint">
+        <p>Maquila especializada en recubrimiento electrostático en polvo para la industria manufacturera de Monterrey, Nuevo León.</p>
+      </div>
+      <div class="footer__col">
+        <h5>Páginas</h5>
+        <ul>
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="nosotros.html">Nosotros</a></li>
+          <li><a href="recursos.html">Blog</a></li>
+          <li><a href="legales.html">Legales</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h5>Contacto</h5>
+        <ul>
+          <li><a href="tel:+528118019604">81 1801 9604</a></li>
+          <li><a href="mailto:marcelo@steel-paint.com.mx">marcelo@steel-paint.com.mx</a></li>
+          <li><a href="https://wa.me/528118019604" target="_blank">WhatsApp</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h5>Ubicación</h5>
+        <ul>
+          <li><a href="#">Monte de Los Olivos 109</a></li>
+          <li><a href="#">Santa Catarina, N.L.</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bar">
+      <p>© 2025 Steel Paint. | <a href="legales.html" style="color:var(--text-3);text-decoration:underline">Aviso de privacidad</a></p>
+      <span class="footer__credit">Desarrollado por <a href="https://scndal.com" target="_blank">SCNDAL</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
