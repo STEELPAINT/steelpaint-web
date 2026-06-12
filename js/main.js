@@ -186,6 +186,7 @@
       gateForm.addEventListener('submit', function (e) {
         e.preventDefault();
         var btn  = gateForm.querySelector('[type="submit"]');
+        var originalText = btn.innerHTML;
         btn.textContent = 'Verificando...';
         btn.disabled    = true;
 
@@ -198,13 +199,31 @@
         };
         localStorage.setItem('sp_lead', JSON.stringify(lead));
 
-        setTimeout(function () {
-          if (gateWrap) gateWrap.style.display = 'none';
-          if (calcWrap) {
-            calcWrap.style.display = 'block';
-            calcWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }, 700);
+        fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombre:   lead.nombre,
+            empresa:  lead.empresa,
+            telefono: lead.telefono,
+            email:    lead.email,
+            mensaje:  ''
+          })
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error('Request failed');
+            if (gateWrap) gateWrap.style.display = 'none';
+            if (calcWrap) {
+              calcWrap.style.display = 'block';
+              calcWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          })
+          .catch(function () {
+            localStorage.removeItem('sp_lead');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            alert('Hubo un error enviando tus datos. Por favor intenta de nuevo.');
+          });
       });
     }
 
@@ -276,17 +295,38 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var btn = form.querySelector('[type="submit"]');
+      var originalText = btn.innerHTML;
       btn.textContent = 'Enviando...';
       btn.disabled    = true;
-      setTimeout(function () {
-        var success = document.querySelector('.form-success');
-        if (success) {
-          form.style.display = 'none';
-          success.classList.add('show');
-        } else {
-          btn.textContent = '¡Mensaje enviado!';
-        }
-      }, 900);
+
+      var payload = {
+        nombre:   document.getElementById('c-nombre').value,
+        empresa:  document.getElementById('c-empresa').value,
+        telefono: document.getElementById('c-telefono').value,
+        email:    document.getElementById('c-email').value,
+        mensaje:  document.getElementById('c-mensaje').value
+      };
+
+      fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+        .then(function (res) {
+          if (!res.ok) throw new Error('Request failed');
+          var success = document.querySelector('.form-success');
+          if (success) {
+            form.style.display = 'none';
+            success.classList.add('show');
+          } else {
+            btn.textContent = '¡Mensaje enviado!';
+          }
+        })
+        .catch(function () {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          alert('Hubo un error enviando el mensaje. Por favor intenta de nuevo.');
+        });
     });
   }
 
