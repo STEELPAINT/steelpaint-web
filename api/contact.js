@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     },
     body: JSON.stringify({
       from: 'Steel Paint <contacto@mail.steel-paint.com.mx>',
-      to: ['canva@scndal.com'],
+      to: ['hola@scndal.com'],
       subject: `Nuevo lead: ${nombre} / ${empresa}`,
       html: `
         <h2>Nuevo mensaje desde steel-paint.com.mx</h2>
