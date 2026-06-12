@@ -341,57 +341,58 @@
     });
   }
 
-  /* ── GALLERY CAROUSEL + LIGHTBOX ───────────────────────────── */
+  /* ── GALLERY MOSAIC + LIGHTBOX ─────────────────────────────── */
   function initGallery() {
-    var carousel = document.getElementById('gallery-carousel');
+    var grid     = document.getElementById('gallery-mosaic');
     var lightbox = document.getElementById('lightbox');
-    if (!carousel) return;
+    if (!grid) return;
 
-    var viewport = carousel.querySelector('.carousel__viewport');
-    var track    = carousel.querySelector('.carousel__track');
-    var slides   = carousel.querySelectorAll('.carousel__slide');
-    if (!track || !slides.length) return;
+    var cells = grid.querySelectorAll('.gi');
+    var imgs  = grid.querySelectorAll('.gi img');
+    if (!cells.length) return;
 
-    var idx   = 0;
-    var timer = null;
-    var INTERVAL_MS = 3000;
+    var sets = [
+      ['galeria-01.jpg', 'galeria-02.jpg', 'galeria-03.jpg', 'galeria-04.jpg', 'galeria-05.jpg'],
+      ['galeria-06.jpg', 'galeria-07.jpg', 'galeria-08.jpg', 'galeria-09.jpg', 'galeria-01.jpg']
+    ];
 
-    function visibleCount() {
-      var w = window.innerWidth;
-      if (w <= 600) return 1;
-      if (w <= 768) return 2;
-      return 3;
+    /* Preload every image so swaps are instant */
+    for (var n = 1; n <= 9; n++) {
+      var pre = new Image();
+      pre.src = 'assets/galeria-' + (n < 10 ? '0' + n : n) + '.jpg';
     }
-    function maxIdx() {
-      return Math.max(0, slides.length - visibleCount());
+
+    var currentSet  = 0;
+    var rotateTimer = null;
+    var INTERVAL_MS = 4000;
+    var FADE_MS     = 500;
+
+    function applySet(setIdx) {
+      var arr = sets[setIdx];
+      imgs.forEach(function (img, i) {
+        img.src = 'assets/' + arr[i];
+      });
     }
-    function update() {
-      var slideW = viewport.clientWidth / visibleCount();
-      track.style.transform = 'translateX(' + (-idx * slideW) + 'px)';
+
+    function rotate() {
+      currentSet = (currentSet + 1) % sets.length;
+      grid.classList.add('is-fading');
+      setTimeout(function () {
+        applySet(currentSet);
+        grid.classList.remove('is-fading');
+      }, FADE_MS);
     }
-    function next() {
-      idx = idx >= maxIdx() ? 0 : idx + 1;
-      update();
-    }
+
     function start() {
       stop();
-      timer = setInterval(next, INTERVAL_MS);
+      rotateTimer = setInterval(rotate, INTERVAL_MS);
     }
     function stop() {
-      if (timer) { clearInterval(timer); timer = null; }
+      if (rotateTimer) { clearInterval(rotateTimer); rotateTimer = null; }
     }
 
-    carousel.addEventListener('mouseenter', stop);
-    carousel.addEventListener('mouseleave', start);
-
-    var resizeTimer;
-    window.addEventListener('resize', function () {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function () {
-        if (idx > maxIdx()) idx = maxIdx();
-        update();
-      }, 120);
-    });
+    grid.addEventListener('mouseenter', stop);
+    grid.addEventListener('mouseleave', start);
 
     /* Lightbox */
     function openLightbox(src, alt) {
@@ -408,17 +409,22 @@
       if (!lightbox) return;
       lightbox.classList.remove('is-open');
       lightbox.setAttribute('aria-hidden', 'true');
-      var img = lightbox.querySelector('.lightbox__img');
-      img.src = '';
+      lightbox.querySelector('.lightbox__img').src = '';
       document.body.style.overflow = '';
       start();
     }
 
-    slides.forEach(function (slide) {
-      slide.addEventListener('click', function () {
-        var src = slide.getAttribute('data-src');
-        var inner = slide.querySelector('img');
-        openLightbox(src, inner ? inner.alt : '');
+    cells.forEach(function (cell) {
+      cell.addEventListener('click', function () {
+        var img = cell.querySelector('img');
+        if (img) openLightbox(img.src, img.alt);
+      });
+      cell.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          var img = cell.querySelector('img');
+          if (img) openLightbox(img.src, img.alt);
+        }
       });
     });
 
@@ -435,7 +441,6 @@
       });
     }
 
-    update();
     start();
   }
 
