@@ -12,7 +12,7 @@ export default async function handler(req, res) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      from: 'Steel Paint Web <onboarding@resend.dev>',
+      from: 'Steel Paint <contacto@mail.steel-paint.com.mx>',
       to: 'marcelo.steelpaint@gmail.com',
       subject: `Nuevo lead: ${nombre} / ${empresa}`,
       html: `
