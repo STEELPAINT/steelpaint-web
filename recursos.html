@@ -55,17 +55,16 @@
 
 <!-- ═══════════════════════════════════════════════
      CATEGORÍAS
+     Regla: solo se muestran las categorías que tienen
+     al menos un artículo publicado. Se generan con JS a
+     partir de los artículos presentes en el grid, por lo
+     que una categoría vacía nunca aparece. La barra entera
+     se oculta si no hay artículos.
 ════════════════════════════════════════════════ -->
-<div style="padding:1.5rem 0;background:var(--bg-1);border-bottom:1px solid var(--border);">
+<div id="cat-bar" style="padding:1.5rem 0;background:var(--bg-1);border-bottom:1px solid var(--border);display:none;">
   <div class="wrap">
-    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+    <div id="blog-filters" style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
       <span style="font-size:0.75rem;color:var(--text-3);font-weight:600;margin-right:0.5rem;">Filtrar:</span>
-      <a href="#" style="font-size:0.78rem;font-weight:600;color:var(--g-400);background:rgba(22,163,74,0.1);border:1px solid var(--border-g);border-radius:100px;padding:0.3rem 0.9rem;">Todos</a>
-      <a href="#" style="font-size:0.78rem;font-weight:600;color:var(--text-2);border:1px solid var(--border);border-radius:100px;padding:0.3rem 0.9rem;transition:all 0.2s;">Guías técnicas</a>
-      <a href="#" style="font-size:0.78rem;font-weight:600;color:var(--text-2);border:1px solid var(--border);border-radius:100px;padding:0.3rem 0.9rem;transition:all 0.2s;">Industria NL</a>
-      <a href="#" style="font-size:0.78rem;font-weight:600;color:var(--text-2);border:1px solid var(--border);border-radius:100px;padding:0.3rem 0.9rem;transition:all 0.2s;">Precios y costos</a>
-      <a href="#" style="font-size:0.78rem;font-weight:600;color:var(--text-2);border:1px solid var(--border);border-radius:100px;padding:0.3rem 0.9rem;transition:all 0.2s;">Acabados</a>
-      <a href="#" style="font-size:0.78rem;font-weight:600;color:var(--text-2);border:1px solid var(--border);border-radius:100px;padding:0.3rem 0.9rem;transition:all 0.2s;">Materiales</a>
     </div>
   </div>
 </div>
@@ -79,7 +78,7 @@
     <div class="blog-grid">
 
       <!-- Artículo 1 -->
-      <article class="blog-card reveal">
+      <a href="articulo-ejemplo.html" class="blog-card reveal" style="text-decoration:none;">
         <div class="blog-card__img">
           <i class="fa-solid fa-spray-can-sparkles"></i>
           <span>Imagen del artículo</span>
@@ -89,164 +88,11 @@
           <h3>¿Qué es la maquila de pintura en polvo y cómo puede mejorar tu proceso productivo?</h3>
           <p>La pintura en polvo o powder coating es el método de recubrimiento más utilizado en manufactura industrial. En este artículo explicamos cómo funciona, sus ventajas frente a la pintura líquida y por qué subcontratar la maquila es la decisión más eficiente para fabricantes en Nuevo León.</p>
           <div class="blog-meta">
-            <span>Enero 2025 · 6 min</span>
+            <span>Enero 2025 · 7 min</span>
             <span class="blog-read">Leer artículo →</span>
           </div>
         </div>
-      </article>
-
-      <!-- Artículo 2 -->
-      <article class="blog-card reveal d1">
-        <div class="blog-card__img">
-          <i class="fa-solid fa-scale-balanced"></i>
-          <span>Imagen del artículo</span>
-        </div>
-        <div class="blog-card__body">
-          <span class="blog-tag">Comparativa</span>
-          <h3>Pintura electrostática en polvo vs. pintura líquida: ventajas reales para la manufactura industrial</h3>
-          <p>Adherencia, durabilidad, costo por metro cuadrado y tiempos de proceso: comparamos ambos métodos con datos reales para que puedas tomar la mejor decisión para tu línea de producción.</p>
-          <div class="blog-meta">
-            <span>Enero 2025 · 8 min</span>
-            <span class="blog-read">Leer artículo →</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Artículo 3 -->
-      <article class="blog-card reveal d2">
-        <div class="blog-card__img">
-          <i class="fa-solid fa-list-check"></i>
-          <span>Imagen del artículo</span>
-        </div>
-        <div class="blog-card__body">
-          <span class="blog-tag">Industria NL</span>
-          <h3>Cómo elegir un proveedor de powder coating en Monterrey: 7 criterios que no debes ignorar</h3>
-          <p>No todos los maquiladores de pintura en polvo son iguales. Te damos los 7 criterios clave que deben evaluarse antes de elegir un proveedor: capacidad instalada, tiempos de entrega, control de calidad, certificaciones y más.</p>
-          <div class="blog-meta">
-            <span>Febrero 2025 · 7 min</span>
-            <span class="blog-read">Leer artículo →</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Artículo 4 -->
-      <article class="blog-card reveal">
-        <div class="blog-card__img">
-          <i class="fa-solid fa-tag"></i>
-          <span>Imagen del artículo</span>
-        </div>
-        <div class="blog-card__body">
-          <span class="blog-tag">Precios y costos</span>
-          <h3>¿Cuánto cuesta la pintura en polvo por metro cuadrado en México? Guía de precios 2025</h3>
-          <p>El costo de la maquila de pintura electrostática en México varía según el tipo de acabado, la preparación de superficie y el volumen. En esta guía explicamos cómo se calcula y cuáles son los rangos de precio en Monterrey.</p>
-          <div class="blog-meta">
-            <span>Febrero 2025 · 5 min</span>
-            <span class="blog-read">Leer artículo →</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Artículo 5 -->
-      <article class="blog-card reveal d1">
-        <div class="blog-card__img">
-          <i class="fa-solid fa-car-side"></i>
-          <span>Imagen del artículo</span>
-        </div>
-        <div class="blog-card__body">
-          <span class="blog-tag">Industria NL</span>
-          <h3>Pintura electrostática para la industria automotriz en Nuevo León: estándares y especificaciones</h3>
-          <p>El clúster automotriz de Nuevo León (KIA, Toyota, proveedores Tier 1 y Tier 2) exige recubrimientos de alta adherencia y resistencia. Explicamos los estándares que deben cumplir los acabados en polvo para este sector.</p>
-          <div class="blog-meta">
-            <span>Marzo 2025 · 9 min</span>
-            <span class="blog-read">Leer artículo →</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Artículo 6 -->
-      <article class="blog-card reveal d2">
-        <div class="blog-card__img">
-          <i class="fa-solid fa-water"></i>
-          <span>Imagen del artículo</span>
-        </div>
-        <div class="blog-card__body">
-          <span class="blog-tag">Guía técnica</span>
-          <h3>Preparación de superficie antes del powder coating: por qué define el 80% del resultado final</h3>
-          <p>El pretratamiento es el paso más crítico del proceso de pintura electrostática. Un lavado incorrecto arruina el acabado sin importar la calidad de la pintura. Te explicamos cómo funciona el proceso correcto en 3 etapas.</p>
-          <div class="blog-meta">
-            <span>Marzo 2025 · 7 min</span>
-            <span class="blog-read">Leer artículo →</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Artículo 7 -->
-      <article class="blog-card reveal">
-        <div class="blog-card__img">
-          <i class="fa-solid fa-palette"></i>
-          <span>Imagen del artículo</span>
-        </div>
-        <div class="blog-card__body">
-          <span class="blog-tag">Acabados</span>
-          <h3>Tipos de acabados en pintura electrostática: mate, brillante, texturizado, satinado y más</h3>
-          <p>Cada acabado en powder coating tiene propiedades, aplicaciones y costos distintos. Esta guía te ayuda a elegir el acabado correcto según el uso de tu pieza, el ambiente de operación y los requerimientos estéticos.</p>
-          <div class="blog-meta">
-            <span>Abril 2025 · 6 min</span>
-            <span class="blog-read">Leer artículo →</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Artículo 8 -->
-      <article class="blog-card reveal d1">
-        <div class="blog-card__img">
-          <i class="fa-solid fa-fire-flame-curved"></i>
-          <span>Imagen del artículo</span>
-        </div>
-        <div class="blog-card__body">
-          <span class="blog-tag">Guía técnica</span>
-          <h3>Horno continuo vs. horno batch en pintura en polvo: ¿cuál conviene para tu proyecto?</h3>
-          <p>El tipo de horno determina el costo, el tiempo y la flexibilidad del proceso. El horno continuo es ideal para producción en serie; el batch, para lotes pequeños y piezas especiales. Te explicamos las diferencias clave.</p>
-          <div class="blog-meta">
-            <span>Abril 2025 · 5 min</span>
-            <span class="blog-read">Leer artículo →</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Artículo 9 -->
-      <article class="blog-card reveal d2">
-        <div class="blog-card__img">
-          <i class="fa-solid fa-table-cells"></i>
-          <span>Imagen del artículo</span>
-        </div>
-        <div class="blog-card__body">
-          <span class="blog-tag">Materiales</span>
-          <h3>Tipos de pintura en polvo: epóxica, poliéster, híbrida y poliuretano. ¿Cuál usar?</h3>
-          <p>No todas las pinturas en polvo son iguales. Epóxicas para interiores, poliéster para exteriores, híbridas para aplicaciones generales. Esta guía técnica explica las diferencias y te ayuda a especificar el producto correcto.</p>
-          <div class="blog-meta">
-            <span>Mayo 2025 · 8 min</span>
-            <span class="blog-read">Leer artículo →</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Artículo 10 -->
-      <article class="blog-card reveal">
-        <div class="blog-card__img">
-          <i class="fa-solid fa-couch"></i>
-          <span>Imagen del artículo</span>
-        </div>
-        <div class="blog-card__body">
-          <span class="blog-tag">Industria NL</span>
-          <h3>Pintura en polvo para mueble metálico en Nuevo León: especificaciones y mejores prácticas</h3>
-          <p>La industria del mueble metálico en el noreste de México es uno de los principales consumidores de powder coating. Esta guía cubre las especificaciones de acabado, los tipos de pintura recomendados y los errores más comunes en el proceso.</p>
-          <div class="blog-meta">
-            <span>Mayo 2025 · 6 min</span>
-            <span class="blog-read">Leer artículo →</span>
-          </div>
-        </div>
-      </article>
+      </a>
 
     </div><!-- /blog-grid -->
   </div>
@@ -302,9 +148,9 @@
         <h5>Contacto</h5>
         <ul>
           <li><a href="tel:+528180294154">81 8029 4154</a></li>
-          <li><a href="mailto:marcelo@steel-paint.com.mx">marcelo@steel-paint.com.mx</a></li>
+          <li><a href="mailto:ventas@steel-paint.com.mx">ventas@steel-paint.com.mx</a></li>
           <li><a href="https://wa.me/528180294154" target="_blank">WhatsApp</a></li>
-          <li><a href="#">Santa Catarina, N.L.</a></li>
+          <li><span style="font-size:0.85rem;color:var(--text-3);cursor:default;">Santa Catarina, N.L.</span></li>
         </ul>
       </div>
     </div>
@@ -316,5 +162,79 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script>
+/* ── Categorías dinámicas del blog ──────────────────────────────
+   Regla: una categoría solo se muestra si tiene al menos un
+   artículo. Las categorías se derivan del .blog-tag de cada
+   tarjeta presente en el grid, así que una categoría sin notas
+   nunca aparece. Si no hay artículos, la barra no se muestra.    */
+(function () {
+  var grid    = document.querySelector('.blog-grid');
+  var bar     = document.getElementById('cat-bar');
+  var filters = document.getElementById('blog-filters');
+  if (!grid || !bar || !filters) return;
+
+  var cards = Array.prototype.slice.call(grid.querySelectorAll('.blog-card'));
+
+  // Categoría de cada tarjeta = texto de su .blog-tag
+  cards.forEach(function (card) {
+    var tag = card.querySelector('.blog-tag');
+    card.dataset.cat = tag ? tag.textContent.trim() : '';
+  });
+
+  // Categorías únicas que SÍ tienen artículos
+  var cats = [];
+  cards.forEach(function (card) {
+    if (card.dataset.cat && cats.indexOf(card.dataset.cat) === -1) cats.push(card.dataset.cat);
+  });
+
+  // Sin artículos/categorías → la barra permanece oculta
+  if (!cats.length) return;
+
+  function chip(label) {
+    var a = document.createElement('a');
+    a.href = '#';
+    a.textContent = label;
+    a.style.cssText = 'font-size:0.78rem;font-weight:600;color:var(--text-2);border:1px solid var(--border);border-radius:100px;padding:0.3rem 0.9rem;transition:all 0.2s;text-decoration:none;';
+    return a;
+  }
+
+  var todos = chip('Todos');
+  filters.appendChild(todos);
+  var chips = [todos];
+  cats.forEach(function (c) {
+    var el = chip(c);
+    el.dataset.cat = c;
+    filters.appendChild(el);
+    chips.push(el);
+  });
+
+  function setActive(active) {
+    chips.forEach(function (el) {
+      var on = el === active;
+      el.style.color = on ? 'var(--g-400)' : 'var(--text-2)';
+      el.style.background = on ? 'rgba(22,163,74,0.1)' : 'transparent';
+      el.style.borderColor = on ? 'var(--border-g)' : 'var(--border)';
+    });
+  }
+
+  function filter(cat) {
+    cards.forEach(function (card) {
+      card.style.display = (!cat || card.dataset.cat === cat) ? '' : 'none';
+    });
+  }
+
+  chips.forEach(function (el) {
+    el.addEventListener('click', function (e) {
+      e.preventDefault();
+      setActive(el);
+      filter(el === todos ? null : el.dataset.cat);
+    });
+  });
+
+  setActive(todos);
+  bar.style.display = '';
+})();
+</script>
 </body>
 </html>

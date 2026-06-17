@@ -296,7 +296,7 @@
       var ancho  = parseFloat(val('c-ancho'))  || 0;
       var caras  = parseInt(val('c-caras'))    || 1;
       var piezas = parseInt(val('c-piezas'))   || 1;
-      var pm2    = 130; /* $130 / m² */
+      var pm2    = 90; /* $90 / m² */
 
       if (!largo || !ancho) return;
 
