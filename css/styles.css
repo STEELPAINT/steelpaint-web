@@ -231,20 +231,22 @@ p  { color: var(--text-2); line-height: 1.75; }
   background: rgba(6,8,9,0.98);
   backdrop-filter: blur(16px);
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   gap: 2rem;
+  padding: 0 clamp(2rem, 9vw, 3.5rem);
 }
 .mobile-nav.open { display: flex; }
 .mobile-nav a {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-2);
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: var(--text-1);
+  text-align: left;
   transition: color var(--t);
   font-family: var(--f-head);
 }
 .mobile-nav a:hover { color: var(--g-400); }
-.mobile-nav .btn { font-size: 1rem; }
+.mobile-nav .btn { font-size: 1.05rem; font-weight: 600; color: #fff; }
 .mobile-nav__close {
   position: absolute;
   top: 1.5rem; right: 1.5rem;
@@ -1180,22 +1182,54 @@ p  { color: var(--text-2); line-height: 1.75; }
 @media (max-width: 768px) {
   .nav__links, .nav__cta { display: none; }
   .nav__burger            { display: flex; }
-  .grid-2, .grid-3, .why-grid, .ind-grid, .blog-grid, .vals-grid, .mv-block { grid-template-columns: 1fr; }
+  /* Capacidades (.grid-4), industrias y "por qué nosotros" colapsan a 1 columna */
+  .grid-2, .grid-3, .grid-4, .why-grid, .ind-grid, .blog-grid, .vals-grid, .mv-block { grid-template-columns: 1fr; gap: 1.25rem; }
   .process__track         { grid-template-columns: repeat(2,1fr); }
   .lightbox__close        { top: 1rem; right: 1rem; }
   .footer__grid           { grid-template-columns: 1fr; gap: 2rem; }
   .footer__bar            { flex-direction: column; gap: 0.5rem; text-align: center; }
+  /* Botones del hero: apilados y ancho completo */
   .hero__actions          { flex-direction: column; }
-  .hero__actions .btn     { justify-content: center; }
+  .hero__actions .btn     { justify-content: center; width: 100%; }
+  /* Oculta el indicador "Scroll" en móvil: se superponía a los botones del hero */
+  .hero__scroll           { display: none; }
   .form-row               { grid-template-columns: 1fr; }
   .stat                   { border-right: none; border-bottom: 1px solid var(--border); }
   .stat:last-child        { border-bottom: none; }
   .cta-band__actions      { flex-direction: column; align-items: center; }
   .calc-inputs            { grid-template-columns: 1fr; }
   .calc-breakdown         { grid-template-columns: 1fr 1fr; }
+  /* Logos de clientes y marcas: wrap en varias filas (anula el flex-wrap:nowrap inline) */
+  .clients .clients__logos { flex-wrap: wrap; gap: 1rem 1.5rem; }
+  .brands__row             { gap: 1rem; }
+  .brands__row .brand-box  { min-width: 104px; }
 }
 @media (max-width: 480px) {
-  .process__track  { grid-template-columns: 1fr; }
-  .stats__grid     { grid-template-columns: 1fr; }
+  /* Más aire en los laterales en móvil */
+  .wrap            { padding-left: 1.5rem; padding-right: 1.5rem; }
+  /* Proceso: 5 pasos en 1 columna, centrados, número arriba del texto */
+  .process__track  { grid-template-columns: 1fr; gap: 2rem; }
+  .pstep           { max-width: 320px; margin-left: auto; margin-right: auto; }
+  /* Stats: grid 2x2 en móvil con bordes limpios */
+  .stats__grid     { grid-template-columns: repeat(2,1fr); }
+  .stat            { padding: 1.75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .stat:nth-child(2n)  { border-right: none; }
+  .stat:nth-child(n+3) { border-bottom: none; }
   .calc-breakdown  { grid-template-columns: 1fr; }
+  /* Hero: refuerza el contraste para que el texto sea legible sobre el video/partículas */
+  .hero video { opacity: 0.16 !important; }
+  .hero__overlay {
+    background: linear-gradient(160deg,
+      rgba(6,8,9,0.96) 0%,
+      rgba(6,8,9,0.9) 50%,
+      rgba(14,42,24,0.72) 100%);
+  }
+  .hero h1,
+  .hero__lead,
+  .hero__sub      { text-shadow: 0 2px 14px rgba(0,0,0,0.6); }
+  /* Galería conveyor: imágenes de 160px de alto, sin desbordar */
+  .marquee        { height: 160px; }
+  .mq-item        { height: 160px; }
+  /* Clientes: separación más compacta al envolver en 2-3 por fila */
+  .clients .clients__logos { gap: 0.85rem 1.1rem; }
 }
