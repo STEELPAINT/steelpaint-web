@@ -1,0 +1,26 @@
+# llms.txt - Steel Paint
+# Maquila de pintura electrostática en Monterrey, NL
+
+> Steel Paint es una maquiladora de pintura electrostática en polvo ubicada en Santa Catarina, Nuevo León. Atendemos a la industria manufacturera del noreste de México con capacidad de 2,300 piezas diarias y línea automatizada de 95 metros.
+
+## Páginas principales
+- https://steel-paint.com.mx/ - Inicio
+- https://steel-paint.com.mx/nosotros.html - Quiénes somos
+- https://steel-paint.com.mx/calculadora.html - Calculadora de cotización
+- https://steel-paint.com.mx/recursos.html - Blog técnico
+
+## Artículos
+- https://steel-paint.com.mx/articulo-que-es-maquila-pintura-polvo.html - ¿Qué es la maquila de pintura en polvo y cómo puede mejorar tu proceso productivo?
+- https://steel-paint.com.mx/articulo-pintura-polvo-vs-liquida.html - Pintura en polvo vs pintura líquida: ¿cuál conviene a tu industria?
+- https://steel-paint.com.mx/articulo-preparacion-superficie-powder-coating.html - Preparación de superficie para powder coating: la etapa que define la calidad del acabado
+- https://steel-paint.com.mx/articulo-tipos-acabados-pintura-electrostatica.html - Tipos de acabados en pintura electrostática: guía completa para elegir el correcto
+- https://steel-paint.com.mx/articulo-pintura-polvo-industria-automotriz-monterrey.html - Pintura en polvo para la industria automotriz en Monterrey: estándares, procesos y tiempos de entrega
+- https://steel-paint.com.mx/articulo-costo-maquila-pintura-polvo-mexico.html - ¿Cuánto cuesta la maquila de pintura en polvo en México? Guía de precios y factores
+- https://steel-paint.com.mx/articulo-elegir-maquilador-pintura-polvo-monterrey.html - Cómo elegir un maquilador de pintura en polvo en Monterrey: criterios y señales de alerta
+- https://steel-paint.com.mx/articulo-pintura-electrostatica-muebles-metalicos.html - Pintura electrostática para muebles metálicos de exterior: acabados y durabilidad
+- https://steel-paint.com.mx/articulo-recubrimiento-polvo-vs-galvanizado.html - Recubrimiento en polvo vs galvanizado: diferencias técnicas y cuándo usar cada uno
+
+## Contacto
+- ventas@steel-paint.com.mx
+- 81 8029 4154
+- Santa Catarina, Nuevo León, México
