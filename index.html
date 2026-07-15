@@ -515,7 +515,7 @@
           <div class="form-row">
             <div class="form-group">
               <label for="c-telefono">Teléfono</label>
-              <input type="tel" id="c-telefono" name="telefono" placeholder="81 0000 0000">
+              <input type="tel" id="c-telefono" name="telefono" placeholder="81 0000 0000" required>
             </div>
             <div class="form-group">
               <label for="c-email">Correo electrónico</label>
@@ -530,6 +530,7 @@
             <input type="checkbox" id="c-comms" name="comms" style="margin-top:0.25rem;flex-shrink:0;">
             <span>Acepto recibir comunicaciones sobre los servicios de Steel Paint.</span>
           </label>
+          <p id="contact-error" style="display:none;color:#c0392b;font-size:0.85rem;margin-bottom:1rem;"></p>
           <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
             <i class="fa-solid fa-paper-plane"></i> Enviar mensaje
           </button>

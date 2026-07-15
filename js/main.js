@@ -215,6 +215,25 @@
     if (gateForm) {
       gateForm.addEventListener('submit', function (e) {
         e.preventDefault();
+
+        /* Required fields */
+        var gErrors = [];
+        var nombre   = val('g-nombre').trim();
+        var telefono = val('g-telefono').trim();
+        var email    = val('g-email').trim();
+        if (!nombre)   gErrors.push('Ingresa tu nombre completo.');
+        if (!telefono) gErrors.push('Ingresa tu teléfono.');
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) gErrors.push('Ingresa un correo electrónico válido.');
+        var gateErrEl = document.getElementById('gate-error');
+        if (gErrors.length) {
+          if (gateErrEl) {
+            gateErrEl.innerHTML = gErrors.join('<br>');
+            gateErrEl.style.display = 'block';
+          }
+          return;
+        }
+        if (gateErrEl) gateErrEl.style.display = 'none';
+
         var btn  = gateForm.querySelector('[type="submit"]');
         var originalText = btn.innerHTML;
         btn.textContent = 'Verificando...';
@@ -291,14 +310,25 @@
       });
     }
 
+    var MIN_LARGO  = 0.30; /* 30 cm */
+    var MIN_ANCHO  = 0.20; /* 20 cm */
+    var MIN_PIEZAS = 10;
+
     function calculate() {
       var largo  = parseFloat(val('c-largo'))  || 0;
       var ancho  = parseFloat(val('c-ancho'))  || 0;
       var caras  = parseInt(val('c-caras'))    || 1;
       var piezas = parseInt(val('c-piezas'))   || 1;
-      var pm2    = 90; /* $90 / m² */
+      var pm2    = 130; /* $130 / m² */
 
       if (!largo || !ancho) return;
+
+      /* Minimums */
+      var errors = [];
+      if (largo  < MIN_LARGO)  errors.push('El largo mínimo es 0.30 m (30 cm).');
+      if (ancho  < MIN_ANCHO)  errors.push('El ancho mínimo es 0.20 m (20 cm).');
+      if (piezas < MIN_PIEZAS) errors.push('El mínimo es 10 piezas por lote.');
+      if (!showCalcError(errors)) return;
 
       var areaPieza = largo * ancho * caras;
       var areaTotal = areaPieza * piezas;
@@ -343,6 +373,20 @@
       var el = document.getElementById(id);
       if (el) el.textContent = txt;
     }
+    /* Returns true if valid (no errors) */
+    function showCalcError(errors) {
+      var el = document.getElementById('calc-error');
+      if (!errors.length) {
+        if (el) el.style.display = 'none';
+        return true;
+      }
+      if (el) {
+        el.innerHTML = errors.join('<br>');
+        el.style.display = 'block';
+      }
+      if (resultDiv) resultDiv.classList.remove('show');
+      return false;
+    }
   }
 
   /* ── CONTACT FORM ──────────────────────────────────────────── */
@@ -351,17 +395,40 @@
     if (!form) return;
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+
+      /* Required fields */
+      var gv = function (id) {
+        var el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+      };
+      var nombre   = gv('c-nombre');
+      var telefono = gv('c-telefono');
+      var email    = gv('c-email');
+      var errors = [];
+      if (!nombre)   errors.push('Ingresa tu nombre.');
+      if (!telefono) errors.push('Ingresa tu teléfono.');
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Ingresa un correo electrónico válido.');
+      var errEl = document.getElementById('contact-error');
+      if (errors.length) {
+        if (errEl) {
+          errEl.innerHTML = errors.join('<br>');
+          errEl.style.display = 'block';
+        }
+        return;
+      }
+      if (errEl) errEl.style.display = 'none';
+
       var btn = form.querySelector('[type="submit"]');
       var originalText = btn.innerHTML;
       btn.textContent = 'Enviando...';
       btn.disabled    = true;
 
       var payload = {
-        nombre:   document.getElementById('c-nombre').value,
-        empresa:  document.getElementById('c-empresa').value,
-        telefono: document.getElementById('c-telefono').value,
-        email:    document.getElementById('c-email').value,
-        mensaje:  document.getElementById('c-mensaje').value
+        nombre:   nombre,
+        empresa:  gv('c-empresa'),
+        telefono: telefono,
+        email:    email,
+        mensaje:  gv('c-mensaje')
       };
 
       fetch('/api/contact', {
