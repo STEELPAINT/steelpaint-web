@@ -1,3 +1,13 @@
+function escapeHtml(str) {
+  if (str === undefined || str === null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -7,7 +17,7 @@ export default async function handler(req, res) {
 
   const hasCalc = largo !== undefined && ancho !== undefined;
   const mensajeSection = mensaje
-    ? `<p><strong>Mensaje:</strong> ${mensaje}</p>`
+    ? `<p><strong>Mensaje:</strong> ${escapeHtml(mensaje)}</p>`
     : '';
   const calcSection = hasCalc
     ? `
@@ -37,10 +47,10 @@ export default async function handler(req, res) {
             : `Registro en calculadora: ${nombre} / ${empresa}`,
         html: `
         <h2>Nuevo mensaje desde steel-paint.com.mx</h2>
-        <p><strong>Nombre:</strong> ${nombre}</p>
-        <p><strong>Empresa:</strong> ${empresa}</p>
-        <p><strong>Teléfono:</strong> ${telefono}</p>
-        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Nombre:</strong> ${escapeHtml(nombre)}</p>
+        <p><strong>Empresa:</strong> ${escapeHtml(empresa)}</p>
+        <p><strong>Teléfono:</strong> ${escapeHtml(telefono)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
         ${mensajeSection}
         ${calcSection}
       `
