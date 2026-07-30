@@ -20,21 +20,22 @@ export default async function handler(req, res) {
       `
     : '';
 
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      from: 'Steel Paint <contacto@mail.steel-paint.com.mx>',
-      to: ['hola@scndal.com', 'marcelo.steelpaint@gmail.com', 'marcelo@steel-paint.com.mx'],
-      subject: hasCalc
-        ? `Actualización de lead: ${nombre} / ${empresa}`
-        : mensaje
-          ? `Nuevo lead: ${nombre} / ${empresa}`
-          : `Registro en calculadora: ${nombre} / ${empresa}`,
-      html: `
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'Steel Paint <contacto@mail.steel-paint.com.mx>',
+        to: ['hola@scndal.com', 'marcelo.steelpaint@gmail.com', 'marcelo@steel-paint.com.mx'],
+        subject: hasCalc
+          ? `Actualización de lead: ${nombre} / ${empresa}`
+          : mensaje
+            ? `Nuevo lead: ${nombre} / ${empresa}`
+            : `Registro en calculadora: ${nombre} / ${empresa}`,
+        html: `
         <h2>Nuevo mensaje desde steel-paint.com.mx</h2>
         <p><strong>Nombre:</strong> ${nombre}</p>
         <p><strong>Empresa:</strong> ${empresa}</p>
@@ -43,12 +44,15 @@ export default async function handler(req, res) {
         ${mensajeSection}
         ${calcSection}
       `
-    })
-  });
+      })
+    });
 
-  if (response.ok) {
-    return res.status(200).json({ success: true });
-  } else {
+    if (response.ok) {
+      return res.status(200).json({ success: true });
+    } else {
+      return res.status(500).json({ error: 'Error enviando email' });
+    }
+  } catch (err) {
     return res.status(500).json({ error: 'Error enviando email' });
   }
 }
