@@ -404,10 +404,12 @@
         return el ? el.value.trim() : '';
       };
       var nombre   = gv('c-nombre');
+      var empresa  = gv('c-empresa');
       var telefono = gv('c-telefono');
       var email    = gv('c-email');
       var errors = [];
       if (!nombre)   errors.push('Ingresa tu nombre.');
+      if (!empresa)  errors.push('Ingresa el nombre de tu empresa.');
       if (!telefono) errors.push('Ingresa tu teléfono.');
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Ingresa un correo electrónico válido.');
       var errEl = document.getElementById('contact-error');
@@ -425,12 +427,14 @@
       btn.textContent = 'Enviando...';
       btn.disabled    = true;
 
+      var commsEl = document.getElementById('c-comms');
       var payload = {
         nombre:   nombre,
-        empresa:  gv('c-empresa'),
+        empresa:  empresa,
         telefono: telefono,
         email:    email,
-        mensaje:  gv('c-mensaje')
+        mensaje:  gv('c-mensaje'),
+        comms:    commsEl ? commsEl.checked : false
       };
 
       fetch('/api/contact', {
