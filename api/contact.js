@@ -39,7 +39,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         from: 'Steel Paint <contacto@mail.steel-paint.com.mx>',
-        to: ['hola@scndal.com', 'marcelo.steelpaint@gmail.com', 'marcelo@steel-paint.com.mx'],
+        to: ['hola@scndal.com', 'marcelo.steelpaint@gmail.com', 'marcelo@steel-paint.com.mx', 'andrea.r@scndal.com', 'michel.l@scndal.com'],
         subject: hasCalc
           ? `Actualización de lead: ${nombre} / ${empresa}`
           : mensaje
