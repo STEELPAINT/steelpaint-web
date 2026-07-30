@@ -262,6 +262,8 @@
           .then(function (res) {
             if (!res.ok) throw new Error('Request failed');
             localStorage.setItem('sp_lead', JSON.stringify(lead));
+            window.dataLayer = window.dataLayer || [];
+            dataLayer.push({ event: 'gate_form_success' });
             if (gateWrap) gateWrap.style.display = 'none';
             if (calcWrap) {
               calcWrap.style.display = 'block';
