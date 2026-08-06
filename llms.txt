@@ -1,7 +1,33 @@
-# llms.txt - Steel Paint
-# Maquila de pintura electrostática en Monterrey, NL
+# Steel Paint
 
-> Steel Paint es una maquiladora de pintura electrostática en polvo ubicada en Santa Catarina, Nuevo León. Atendemos a la industria manufacturera del noreste de México con capacidad de 2,300 piezas diarias y línea automatizada de 95 metros.
+> Maquila de pintura electrostática en polvo para piezas metálicas, ubicada en Santa Catarina, Nuevo León, México. Atiende a la industria manufacturera del noreste del país con línea automatizada de 95 metros y capacidad para 2,300 piezas diarias.
+
+Última actualización: 2026-08-05
+
+## Qué hace Steel Paint
+
+Steel Paint es un maquilador, no un fabricante de pintura ni un vendedor de equipo. El cliente envía sus piezas metálicas y Steel Paint las procesa: recepción e inspección, pretratamiento en tres etapas (desengrase fosfato, enjuague y sello), aplicación electrostática de pintura en polvo, horneado y control de calidad dimensional antes de la entrega.
+
+## Capacidades
+
+- Línea continua automatizada de 95 metros
+- Capacidad de 2,300 piezas diarias
+- Doble sistema de horno: continuo de 25 metros para producción en serie, horno batch para lotes pequeños o piezas especiales
+- Procesa piezas ferrosas y no ferrosas
+- Entregas desde 24 horas para proyectos urgentes
+- Más de 10 años operando en Nuevo León
+
+## Marcas de pintura utilizadas
+
+AkzoNobel, Axalta, Sherwin Williams, Tiger y Vitracoat. Fichas técnicas disponibles para validación del cliente.
+
+## Industrias atendidas
+
+Automotriz y autopartes (proveedores Tier 1 y Tier 2), metalmecánica, mueble metálico, HVAC y refrigeración, construcción metálica y manufactura general.
+
+## Zona de servicio
+
+Nuevo León, Coahuila y Tamaulipas.
 
 ## Páginas principales
 - https://steel-paint.com.mx/ - Inicio
@@ -21,6 +47,6 @@
 - https://steel-paint.com.mx/articulo-recubrimiento-polvo-vs-galvanizado.html - Recubrimiento en polvo vs galvanizado: diferencias técnicas y cuándo usar cada uno
 
 ## Contacto
-- ventas@steel-paint.com.mx
-- 81 8029 4154
-- Santa Catarina, Nuevo León, México
+- Correo: ventas@steel-paint.com.mx
+- Teléfono: 81 8029 4154
+- Dirección: Av. Monte de los Olivos 109-A, Col. Fraccionamiento Industrial Monte de los Olivos, C.P. 66360, Santa Catarina, Nuevo León, México
