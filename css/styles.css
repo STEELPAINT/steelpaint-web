@@ -3,6 +3,22 @@
    Tecnológico · Corporativo · Industrial · B2B Monterrey
    ================================================================ */
 
+@font-face {
+  font-family: 'Sora';
+  src: url('../assets/fonts/sora-var.woff2') format('woff2-variations');
+  font-weight: 500 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../assets/fonts/inter-var.woff2') format('woff2-variations');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ── TOKENS ─────────────────────────────────────────────────── */
 :root {
   --bg-0:        #060809;
