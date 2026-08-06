@@ -1247,3 +1247,18 @@ p  { color: var(--text-2); line-height: 1.75; }
   /* Clientes: separación más compacta al envolver en 2-3 por fila */
   .clients .clients__logos { gap: 0.85rem 1.1rem; }
 }
+
+.icon {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  vertical-align: -0.125em;
+  flex-shrink: 0;
+}
+
+body:has(.mobile-nav.open) .nav {
+  pointer-events: none;
+}
+body:has(.mobile-nav.open) .nav__burger {
+  visibility: hidden;
+}
