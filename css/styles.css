@@ -522,7 +522,7 @@ p  { color: var(--text-2); line-height: 1.75; }
   box-shadow: 0 0 20px rgba(22,163,74,0.25);
   color: var(--g-300);
 }
-.pstep h4 {
+.pstep h3 {
   font-size: 0.9rem;
   color: var(--text-1);
   margin-bottom: 0.5rem;
@@ -553,7 +553,7 @@ p  { color: var(--text-2); line-height: 1.75; }
   color: var(--g-500);
   font-size: 1.35rem;
 }
-.cap-card h4 { color: var(--text-1); margin-bottom: 0.6rem; }
+.cap-card h3 { color: var(--text-1); margin-bottom: 0.6rem; }
 .cap-card p  { font-size: 0.875rem; }
 
 /* ── INDUSTRIES ─────────────────────────────────────────────── */
@@ -586,7 +586,7 @@ p  { color: var(--text-2); line-height: 1.75; }
   justify-content: center;
   font-size: 1.3rem;
 }
-.ind-text h4 { color: var(--text-1); font-size: 0.95rem; margin-bottom: 0.35rem; }
+.ind-text h3 { color: var(--text-1); font-size: 0.95rem; margin-bottom: 0.35rem; }
 .ind-text p  { font-size: 0.82rem; }
 
 /* ── BRANDS ─────────────────────────────────────────────────── */
@@ -749,7 +749,7 @@ p  { color: var(--text-2); line-height: 1.75; }
   transition: color var(--t);
 }
 .why-card:hover .why-card__n { color: var(--g-500); }
-.why-card h4 { color: var(--text-1); margin-bottom: 0.5rem; }
+.why-card h3 { color: var(--text-1); margin-bottom: 0.5rem; }
 .why-card p  { font-size: 0.875rem; }
 
 /* ── CTA BANNER ─────────────────────────────────────────────── */
@@ -867,7 +867,7 @@ p  { color: var(--text-2); line-height: 1.75; }
 }
 .footer__brand img { height: 30px; margin-bottom: 1rem; }
 .footer__brand p   { font-size: 0.85rem; max-width: 270px; }
-.footer__col h5 {
+.footer__col h3 {
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -1181,7 +1181,7 @@ p  { color: var(--text-2); line-height: 1.75; }
 }
 .form-success.show { display: block; }
 .form-success i { font-size: 3rem; color: var(--g-500); display: block; margin-bottom: 1rem; }
-.form-success h4 { color: var(--text-1); margin-bottom: 0.5rem; }
+.form-success h3 { color: var(--text-1); margin-bottom: 0.5rem; }
 
 /* ── RESPONSIVE ──────────────────────────────────────────────── */
 @media (max-width: 1024px) {
