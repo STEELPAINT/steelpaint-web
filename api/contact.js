@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { nombre, empresa, telefono, email, mensaje, largo, ancho, caras, piezas, total } = req.body;
+  const { nombre, empresa, telefono, email, mensaje, largo, ancho, caras, piezas, total, gclid } = req.body;
 
   const hasCalc = largo !== undefined && ancho !== undefined;
   const mensajeSection = mensaje
@@ -51,6 +51,7 @@ export default async function handler(req, res) {
         <p><strong>Empresa:</strong> ${escapeHtml(empresa)}</p>
         <p><strong>Teléfono:</strong> ${escapeHtml(telefono)}</p>
         <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+        <p><strong>Gclid:</strong> ${gclid ? escapeHtml(gclid) : 'N/A (no vino de clic en Ads)'}</p>
         ${mensajeSection}
         ${calcSection}
       `

@@ -198,7 +198,8 @@
           ancho:    calc.ancho,
           caras:    calc.caras,
           piezas:   calc.piezas,
-          total:    calc.total
+          total:    calc.total,
+          gclid:    localStorage.getItem('sp_gclid') || ''
         })
       }).then(function (res) {
         if (!res.ok) throw new Error('Request failed');
@@ -256,7 +257,8 @@
             nombre:   lead.nombre,
             empresa:  lead.empresa,
             telefono: lead.telefono,
-            email:    lead.email
+            email:    lead.email,
+            gclid:    localStorage.getItem('sp_gclid') || ''
           })
         })
           .then(function (res) {
@@ -434,7 +436,8 @@
         telefono: telefono,
         email:    email,
         mensaje:  gv('c-mensaje'),
-        comms:    commsEl ? commsEl.checked : false
+        comms:    commsEl ? commsEl.checked : false,
+        gclid:    localStorage.getItem('sp_gclid') || ''
       };
 
       fetch('/api/contact', {
@@ -519,8 +522,20 @@
     }
   }
 
+  /* ── GCLID CAPTURE ─────────────────────────────────────────── */
+  function captureGclid() {
+    var params = new URLSearchParams(window.location.search);
+    var gclid = params.get('gclid');
+    if (gclid) {
+      localStorage.setItem('sp_gclid', gclid);
+      localStorage.setItem('sp_gclid_ts', new Date().toISOString());
+    }
+    /* If no gclid in the URL but one is already stored, keep it */
+  }
+
   /* ── INIT ──────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
+    captureGclid();
     initProgress();
     initNav();
     initMobile();
