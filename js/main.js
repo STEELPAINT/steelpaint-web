@@ -194,6 +194,7 @@
           empresa:  lead.empresa,
           telefono: lead.telefono,
           email:    lead.email,
+          comms:    lead.comms,
           largo:    calc.largo,
           ancho:    calc.ancho,
           caras:    calc.caras,
@@ -220,9 +221,11 @@
         /* Required fields */
         var gErrors = [];
         var nombre   = val('g-nombre').trim();
+        var empresa  = val('g-empresa').trim();
         var telefono = val('g-telefono').trim();
         var email    = val('g-email').trim();
         if (!nombre)   gErrors.push('Ingresa tu nombre completo.');
+        if (!empresa)  gErrors.push('Ingresa el nombre de tu empresa.');
         if (!telefono) gErrors.push('Ingresa tu teléfono.');
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) gErrors.push('Ingresa un correo electrónico válido.');
         var gateErrEl = document.getElementById('gate-error');
@@ -258,6 +261,7 @@
             empresa:  lead.empresa,
             telefono: lead.telefono,
             email:    lead.email,
+            comms:    lead.comms,
             gclid:    localStorage.getItem('sp_gclid') || ''
           })
         })
