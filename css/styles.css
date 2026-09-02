@@ -1183,6 +1183,17 @@ p  { color: var(--text-2); line-height: 1.75; }
 .form-success i { font-size: 3rem; color: var(--g-500); display: block; margin-bottom: 1rem; }
 .form-success h3 { color: var(--text-1); margin-bottom: 0.5rem; }
 
+/* ── HONEYPOT ────────────────────────────────────────────────── */
+/* Fuera de pantalla en vez de display:none, que algunos bots detectan. */
+.hp-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+
 /* ── RESPONSIVE ──────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .grid-4        { grid-template-columns: repeat(2,1fr); }

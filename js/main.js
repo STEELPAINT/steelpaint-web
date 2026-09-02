@@ -195,6 +195,7 @@
           telefono: lead.telefono,
           email:    lead.email,
           comms:    lead.comms,
+          flow:     'cotizacion',
           largo:    calc.largo,
           ancho:    calc.ancho,
           caras:    calc.caras,
@@ -217,6 +218,14 @@
     if (gateForm) {
       gateForm.addEventListener('submit', function (e) {
         e.preventDefault();
+
+        /* Honeypot: bot. Se simula el exito y no se envia nada. */
+        var gateHp = document.getElementById('g-sp-website');
+        if (gateHp && gateHp.value.trim() !== '') {
+          if (gateWrap) gateWrap.style.display = 'none';
+          if (calcWrap) calcWrap.style.display = 'block';
+          return;
+        }
 
         /* Required fields */
         var gErrors = [];
@@ -262,7 +271,8 @@
             telefono: lead.telefono,
             email:    lead.email,
             comms:    lead.comms,
-            gclid:    localStorage.getItem('sp_gclid') || ''
+            gclid:    localStorage.getItem('sp_gclid') || '',
+            flow:     'calculadora'
           })
         })
           .then(function (res) {
@@ -404,6 +414,13 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
 
+      /* Honeypot: bot. Se simula el exito y no se envia nada. */
+      var hp = document.getElementById('c-sp-website');
+      if (hp && hp.value.trim() !== '') {
+        window.location.href = 'gracias.html';
+        return;
+      }
+
       /* Required fields */
       var gv = function (id) {
         var el = document.getElementById(id);
@@ -441,7 +458,8 @@
         email:    email,
         mensaje:  gv('c-mensaje'),
         comms:    commsEl ? commsEl.checked : false,
-        gclid:    localStorage.getItem('sp_gclid') || ''
+        gclid:    localStorage.getItem('sp_gclid') || '',
+        flow:     'contacto'
       };
 
       fetch('/api/contact', {
