@@ -11,6 +11,14 @@ const CRM_ENV_BY_FLOW = {
   cotizacion:  'CRM_URL_COTIZACION'
 };
 
+/* Un secreto por fuente, mismo mapeo rigido: si uno se filtra se revoca
+   esa integracion sin tocar las otras dos. Nunca compartir uno. */
+const CRM_SECRET_ENV_BY_FLOW = {
+  contacto:    'CRM_WEBHOOK_SECRET_CONTACTO',
+  calculadora: 'CRM_WEBHOOK_SECRET_CALCULADORA',
+  cotizacion:  'CRM_WEBHOOK_SECRET_COTIZACION'
+};
+
 const SUBJECT_BY_FLOW = {
   contacto:    'Nuevo lead',
   calculadora: 'Registro en calculadora',
@@ -82,10 +90,22 @@ async function sendToCrm(flow, payload) {
     return { ok: false, reason };
   }
 
+  /* Si falta el secreto se manda igual y el CRM contesta 401: ese 401
+     queda en los logs y en el asunto del correo. Un envio que nunca
+     ocurre no deja rastro de ningun lado. */
+  const secretEnvName = CRM_SECRET_ENV_BY_FLOW[flow];
+  const secret = process.env[secretEnvName];
+  const headers = { 'Content-Type': 'application/json' };
+  if (secret) {
+    headers.Authorization = `Bearer ${secret}`;
+  } else {
+    console.warn(`[contact] falta ${secretEnvName}; se envia sin Authorization (${flow})`);
+  }
+
   try {
     const response = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(CRM_TIMEOUT_MS)
     });
