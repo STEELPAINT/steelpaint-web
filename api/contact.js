@@ -59,7 +59,7 @@ function put(target, key, value) {
 /* Nombres de clave exactos, tal como estan dados de alta en el CRM.
    'comms' es el unico campo que se convierte: el sitio lo maneja como
    booleano, el CRM espera el literal "Si" o "No". */
-function buildCrmPayload(flow, body) {
+function buildCrmPayload(flow, body, attr) {
   const payload = {};
   put(payload, 'nombre',   body.nombre);
   put(payload, 'empresa',  body.empresa);
@@ -68,6 +68,19 @@ function buildCrmPayload(flow, body) {
   put(payload, 'mensaje',  body.mensaje);
   payload.comms = body.comms ? 'Sí' : 'No';
   put(payload, 'gclid',    body.gclid);
+
+  /* Atribucion, plana en la raiz y en los tres flujos: el webhook solo lee
+     claves de primer nivel y un objeto anidado lo ignora sin avisar. Los
+     nombres son los dados de alta en el CRM, sin acentos. String() porque
+     ts, landing y campana llegan del cuerpo y podrian no ser texto; put()
+     se encarga de omitir las que queden vacias. */
+  put(payload, 'canal_primero', String(attr.canalPrimero   || ''));
+  put(payload, 'canal_ultimo',  String(attr.canalUltimo    || ''));
+  put(payload, 'campana',       String(attr.campana        || ''));
+  put(payload, 'landing',       String(attr.landingPrimero || ''));
+  put(payload, 'primer_toque',  String(attr.primerToqueTs  || ''));
+  put(payload, 'ultimo_toque',  String(attr.ultimoToqueTs  || ''));
+
   if (flow === 'cotizacion') {
     put(payload, 'largo',  body.largo);
     put(payload, 'ancho',  body.ancho);
@@ -375,9 +388,11 @@ export default async function handler(req, res) {
   /* El CRM va antes del correo porque el asunto necesita saber si el
      lead entro. Esta aislado en sendToCrm(), asi que el correo sale
      igual pase lo que pase aqui. */
-  const crm = await sendToCrm(flow, buildCrmPayload(flow, req.body));
-
+  /* Una sola vez por peticion: lo consumen el payload del CRM y el correo. */
   const attr = buildAttributionSummary(req.body.attribution);
+
+  const crm = await sendToCrm(flow, buildCrmPayload(flow, req.body, attr));
+
   const html = buildEmailHtml(flow, req.body, crm, attr);
 
   const baseSubject = `${SUBJECT_BY_FLOW[flow]}: ${nombre} / ${empresa}`;

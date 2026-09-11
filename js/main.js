@@ -1218,12 +1218,29 @@
 
   /* ── ATRIBUCION (ADS + UTM) ────────────────────────────────── */
   const ATTR_TTL_MS   = 90 * 24 * 60 * 60 * 1000;   /* 90 dias */
+  const ATTR_TTL_S    = ATTR_TTL_MS / 1000;
   const ATTR_ADS_KEYS = ['gclid', 'gbraid', 'wbraid'];
   const ATTR_UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+
+  /* Respaldo en cookie de primera parte: el ITP de Safari borra a los ~7
+     dias lo que JS escribe en localStorage, y la ventana de atribucion es
+     de 90. La cookie la sigue leyendo JS, asi que nada de HttpOnly. */
+  const ATTR_COOKIE     = 'sp_attr';
+  /* El tope real por cookie ronda 4KB contando nombre y atributos; pasado
+     ese punto el navegador la descarta en silencio y creeriamos tener
+     respaldo. 3500 deja margen para 'sp_attr=' y los atributos. */
+  const ATTR_COOKIE_MAX = 3500;
 
   /* Borra una clave sin propagar errores (modo privado) */
   function attrRemove(key) {
     try { localStorage.removeItem(key); } catch (e) { /* no-op */ }
+  }
+
+  /* Forma y vigencia. Misma regla para localStorage y para la cookie. */
+  function attrVigente(touch) {
+    if (!touch || typeof touch !== 'object' || !touch.ts) return false;
+    var ts = Date.parse(touch.ts);
+    return !isNaN(ts) && (Date.now() - ts) <= ATTR_TTL_MS;
   }
 
   /* Lee un toque guardado; si caduco o es ilegible, lo borra y devuelve null */
@@ -1234,17 +1251,58 @@
 
     var touch = null;
     try { touch = JSON.parse(raw); } catch (e) { touch = null; }
-    if (!touch || typeof touch !== 'object' || !touch.ts) {
-      attrRemove(key);
-      return null;
-    }
-
-    var ts = Date.parse(touch.ts);
-    if (isNaN(ts) || (Date.now() - ts) > ATTR_TTL_MS) {
+    if (!attrVigente(touch)) {
       attrRemove(key);
       return null;
     }
     return touch;
+  }
+
+  /* Devuelve { first, last } de la cookie, o null si no hay o es ilegible. */
+  function attrCookieRead() {
+    var crudo = '';
+    try { crudo = document.cookie || ''; } catch (e) { return null; }
+
+    var partes = crudo.split(';');
+    for (var i = 0; i < partes.length; i++) {
+      var parte = partes[i].trim();
+      if (parte.indexOf(ATTR_COOKIE + '=') !== 0) continue;
+      try {
+        var datos = JSON.parse(decodeURIComponent(parte.slice(ATTR_COOKIE.length + 1)));
+        if (datos && typeof datos === 'object') return datos;
+      } catch (e) { /* cookie ilegible: como si no estuviera */ }
+      return null;
+    }
+    return null;
+  }
+
+  function attrCookieWrite(datos) {
+    try {
+      var valor = encodeURIComponent(JSON.stringify(datos));
+      /* Ya codificado todo es ASCII, asi que length son bytes reales. */
+      if (valor.length > ATTR_COOKIE_MAX) {
+        console.warn('[attr] cookie omitida: ' + valor.length +
+                     ' bytes supera el limite de ' + ATTR_COOKIE_MAX);
+        return;
+      }
+      document.cookie = ATTR_COOKIE + '=' + valor +
+        ';Max-Age=' + ATTR_TTL_S + ';Path=/;SameSite=Lax;Secure';
+    } catch (e) { /* cookies deshabilitadas: queda solo localStorage */ }
+  }
+
+  /* localStorage manda; la cookie es el respaldo. Si localStorage perdio el
+     dato (ITP) pero la cookie lo conserva vigente, se repuebla localStorage
+     para que la siguiente lectura ya no dependa del respaldo. */
+  function attrObtener(key, campo) {
+    var touch = attrRead(key);
+    if (touch) return touch;
+
+    var cookie = attrCookieRead();
+    var respaldo = cookie ? cookie[campo] : null;
+    if (!attrVigente(respaldo)) return null;
+
+    attrWrite(key, respaldo);
+    return respaldo;
   }
 
   function attrWrite(key, touch) {
@@ -1292,15 +1350,25 @@
 
     if (!attrHasSignal(touch, referrer)) return;
 
-    /* El primer toque solo se escribe si no hay uno vigente */
-    if (!attrRead('sp_attr_first')) attrWrite('sp_attr_first', touch);
+    /* El primer toque solo se escribe si no hay uno vigente. Se consulta
+       con attrObtener y no con attrRead: si el ITP vacio localStorage, el
+       primer toque real sigue en la cookie y no debe perderse. */
+    var first = attrObtener('sp_attr_first', 'first');
+    if (!first) {
+      first = touch;
+      attrWrite('sp_attr_first', touch);
+    }
     attrWrite('sp_attr_last', touch);
+
+    /* Los valores van de variables y no releidos de localStorage: en modo
+       privado la escritura falla en silencio y la cookie quedaria vacia. */
+    attrCookieWrite({ first: first, last: touch });
   }
 
   window.SP_getAttribution = function () {
     return {
-      first: attrRead('sp_attr_first'),
-      last:  attrRead('sp_attr_last')
+      first: attrObtener('sp_attr_first', 'first'),
+      last:  attrObtener('sp_attr_last', 'last')
     };
   };
 
