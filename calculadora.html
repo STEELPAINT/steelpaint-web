@@ -145,7 +145,15 @@
         <div class="form-row" style="margin-bottom:1.5rem;">
           <div class="form-group" style="margin-bottom:0">
             <label for="g-telefono">Teléfono *</label>
-            <input type="tel" id="g-telefono" name="telefono" placeholder="81 0000 0000" required>
+            <div class="tel-field">
+              <div class="tel-cc">
+                <input type="text" id="g-telefono-cc" class="tel-cc__input" role="combobox"
+                       aria-expanded="false" aria-controls="g-telefono-cc-list" aria-autocomplete="list"
+                       aria-label="Código de país" autocomplete="off" spellcheck="false" value="México +52">
+                <ul id="g-telefono-cc-list" class="tel-cc__list" role="listbox" aria-label="Países" hidden></ul>
+              </div>
+              <input type="tel" id="g-telefono" name="telefono" class="tel-field__num" placeholder="81 0000 0000" required>
+            </div>
           </div>
           <div class="form-group" style="margin-bottom:0">
             <label for="g-email">Correo electrónico *</label>

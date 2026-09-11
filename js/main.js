@@ -165,6 +165,483 @@
     requestAnimationFrame(tick);
   }
 
+  /* ── TELEFONO CON CODIGO DE PAIS ───────────────────────────── */
+  /* Lista completa de paises. 'codigo' es el prefijo E.164 sin '+'; varios
+     comparten uno (todo el plan norteamericano usa 1). */
+  const TEL_PAISES = [
+    { nombre: 'Afganistán', codigo: '93', iso: 'AF' },
+    { nombre: 'Albania', codigo: '355', iso: 'AL' },
+    { nombre: 'Alemania', codigo: '49', iso: 'DE' },
+    { nombre: 'Andorra', codigo: '376', iso: 'AD' },
+    { nombre: 'Angola', codigo: '244', iso: 'AO' },
+    { nombre: 'Anguila', codigo: '1', iso: 'AI' },
+    { nombre: 'Antártida', codigo: '672', iso: 'AQ' },
+    { nombre: 'Antigua y Barbuda', codigo: '1', iso: 'AG' },
+    { nombre: 'Arabia Saudí', codigo: '966', iso: 'SA' },
+    { nombre: 'Argelia', codigo: '213', iso: 'DZ' },
+    { nombre: 'Argentina', codigo: '54', iso: 'AR' },
+    { nombre: 'Armenia', codigo: '374', iso: 'AM' },
+    { nombre: 'Aruba', codigo: '297', iso: 'AW' },
+    { nombre: 'Australia', codigo: '61', iso: 'AU' },
+    { nombre: 'Austria', codigo: '43', iso: 'AT' },
+    { nombre: 'Azerbaiyán', codigo: '994', iso: 'AZ' },
+    { nombre: 'Bahamas', codigo: '1', iso: 'BS' },
+    { nombre: 'Bangladés', codigo: '880', iso: 'BD' },
+    { nombre: 'Barbados', codigo: '1', iso: 'BB' },
+    { nombre: 'Baréin', codigo: '973', iso: 'BH' },
+    { nombre: 'Bélgica', codigo: '32', iso: 'BE' },
+    { nombre: 'Belice', codigo: '501', iso: 'BZ' },
+    { nombre: 'Benín', codigo: '229', iso: 'BJ' },
+    { nombre: 'Bermudas', codigo: '1', iso: 'BM' },
+    { nombre: 'Bielorrusia', codigo: '375', iso: 'BY' },
+    { nombre: 'Bolivia', codigo: '591', iso: 'BO' },
+    { nombre: 'Bosnia y Herzegovina', codigo: '387', iso: 'BA' },
+    { nombre: 'Botsuana', codigo: '267', iso: 'BW' },
+    { nombre: 'Brasil', codigo: '55', iso: 'BR' },
+    { nombre: 'Brunéi', codigo: '673', iso: 'BN' },
+    { nombre: 'Bulgaria', codigo: '359', iso: 'BG' },
+    { nombre: 'Burkina Faso', codigo: '226', iso: 'BF' },
+    { nombre: 'Burundi', codigo: '257', iso: 'BI' },
+    { nombre: 'Bután', codigo: '975', iso: 'BT' },
+    { nombre: 'Cabo Verde', codigo: '238', iso: 'CV' },
+    { nombre: 'Camboya', codigo: '855', iso: 'KH' },
+    { nombre: 'Camerún', codigo: '237', iso: 'CM' },
+    { nombre: 'Canadá', codigo: '1', iso: 'CA' },
+    { nombre: 'Caribe neerlandés', codigo: '599', iso: 'BQ' },
+    { nombre: 'Catar', codigo: '974', iso: 'QA' },
+    { nombre: 'Chad', codigo: '235', iso: 'TD' },
+    { nombre: 'Chequia', codigo: '420', iso: 'CZ' },
+    { nombre: 'Chile', codigo: '56', iso: 'CL' },
+    { nombre: 'China', codigo: '86', iso: 'CN' },
+    { nombre: 'Chipre', codigo: '357', iso: 'CY' },
+    { nombre: 'Ciudad del Vaticano', codigo: '379', iso: 'VA' },
+    { nombre: 'Colombia', codigo: '57', iso: 'CO' },
+    { nombre: 'Comoras', codigo: '269', iso: 'KM' },
+    { nombre: 'Congo', codigo: '242', iso: 'CG' },
+    { nombre: 'Corea del Norte', codigo: '850', iso: 'KP' },
+    { nombre: 'Corea del Sur', codigo: '82', iso: 'KR' },
+    { nombre: 'Costa Rica', codigo: '506', iso: 'CR' },
+    { nombre: 'Côte d’Ivoire', codigo: '225', iso: 'CI' },
+    { nombre: 'Croacia', codigo: '385', iso: 'HR' },
+    { nombre: 'Cuba', codigo: '53', iso: 'CU' },
+    { nombre: 'Curazao', codigo: '599', iso: 'CW' },
+    { nombre: 'Dinamarca', codigo: '45', iso: 'DK' },
+    { nombre: 'Dominica', codigo: '1', iso: 'DM' },
+    { nombre: 'Ecuador', codigo: '593', iso: 'EC' },
+    { nombre: 'Egipto', codigo: '20', iso: 'EG' },
+    { nombre: 'El Salvador', codigo: '503', iso: 'SV' },
+    { nombre: 'Emiratos Árabes Unidos', codigo: '971', iso: 'AE' },
+    { nombre: 'Eritrea', codigo: '291', iso: 'ER' },
+    { nombre: 'Eslovaquia', codigo: '421', iso: 'SK' },
+    { nombre: 'Eslovenia', codigo: '386', iso: 'SI' },
+    { nombre: 'España', codigo: '34', iso: 'ES' },
+    { nombre: 'Estados Unidos', codigo: '1', iso: 'US' },
+    { nombre: 'Estonia', codigo: '372', iso: 'EE' },
+    { nombre: 'Esuatini', codigo: '268', iso: 'SZ' },
+    { nombre: 'Etiopía', codigo: '251', iso: 'ET' },
+    { nombre: 'Filipinas', codigo: '63', iso: 'PH' },
+    { nombre: 'Finlandia', codigo: '358', iso: 'FI' },
+    { nombre: 'Fiyi', codigo: '679', iso: 'FJ' },
+    { nombre: 'Francia', codigo: '33', iso: 'FR' },
+    { nombre: 'Gabón', codigo: '241', iso: 'GA' },
+    { nombre: 'Gambia', codigo: '220', iso: 'GM' },
+    { nombre: 'Georgia', codigo: '995', iso: 'GE' },
+    { nombre: 'Ghana', codigo: '233', iso: 'GH' },
+    { nombre: 'Gibraltar', codigo: '350', iso: 'GI' },
+    { nombre: 'Granada', codigo: '1', iso: 'GD' },
+    { nombre: 'Grecia', codigo: '30', iso: 'GR' },
+    { nombre: 'Groenlandia', codigo: '299', iso: 'GL' },
+    { nombre: 'Guadalupe', codigo: '590', iso: 'GP' },
+    { nombre: 'Guam', codigo: '1', iso: 'GU' },
+    { nombre: 'Guatemala', codigo: '502', iso: 'GT' },
+    { nombre: 'Guayana Francesa', codigo: '594', iso: 'GF' },
+    { nombre: 'Guernesey', codigo: '44', iso: 'GG' },
+    { nombre: 'Guinea', codigo: '224', iso: 'GN' },
+    { nombre: 'Guinea Ecuatorial', codigo: '240', iso: 'GQ' },
+    { nombre: 'Guinea-Bisáu', codigo: '245', iso: 'GW' },
+    { nombre: 'Guyana', codigo: '592', iso: 'GY' },
+    { nombre: 'Haití', codigo: '509', iso: 'HT' },
+    { nombre: 'Honduras', codigo: '504', iso: 'HN' },
+    { nombre: 'Hong Kong', codigo: '852', iso: 'HK' },
+    { nombre: 'Hungría', codigo: '36', iso: 'HU' },
+    { nombre: 'India', codigo: '91', iso: 'IN' },
+    { nombre: 'Indonesia', codigo: '62', iso: 'ID' },
+    { nombre: 'Irak', codigo: '964', iso: 'IQ' },
+    { nombre: 'Irán', codigo: '98', iso: 'IR' },
+    { nombre: 'Irlanda', codigo: '353', iso: 'IE' },
+    { nombre: 'Isla de Man', codigo: '44', iso: 'IM' },
+    { nombre: 'Isla de Navidad', codigo: '61', iso: 'CX' },
+    { nombre: 'Isla Norfolk', codigo: '672', iso: 'NF' },
+    { nombre: 'Islandia', codigo: '354', iso: 'IS' },
+    { nombre: 'Islas Aland', codigo: '358', iso: 'AX' },
+    { nombre: 'Islas Caimán', codigo: '1', iso: 'KY' },
+    { nombre: 'Islas Cocos', codigo: '61', iso: 'CC' },
+    { nombre: 'Islas Cook', codigo: '682', iso: 'CK' },
+    { nombre: 'Islas Feroe', codigo: '298', iso: 'FO' },
+    { nombre: 'Islas Malvinas', codigo: '500', iso: 'FK' },
+    { nombre: 'Islas Marianas del Norte', codigo: '1', iso: 'MP' },
+    { nombre: 'Islas Marshall', codigo: '692', iso: 'MH' },
+    { nombre: 'Islas Pitcairn', codigo: '64', iso: 'PN' },
+    { nombre: 'Islas Salomón', codigo: '677', iso: 'SB' },
+    { nombre: 'Islas Turcas y Caicos', codigo: '1', iso: 'TC' },
+    { nombre: 'Islas Vírgenes Británicas', codigo: '1', iso: 'VG' },
+    { nombre: 'Islas Vírgenes de EE. UU.', codigo: '1', iso: 'VI' },
+    { nombre: 'Israel', codigo: '972', iso: 'IL' },
+    { nombre: 'Italia', codigo: '39', iso: 'IT' },
+    { nombre: 'Jamaica', codigo: '1', iso: 'JM' },
+    { nombre: 'Japón', codigo: '81', iso: 'JP' },
+    { nombre: 'Jersey', codigo: '44', iso: 'JE' },
+    { nombre: 'Jordania', codigo: '962', iso: 'JO' },
+    { nombre: 'Kazajistán', codigo: '7', iso: 'KZ' },
+    { nombre: 'Kenia', codigo: '254', iso: 'KE' },
+    { nombre: 'Kirguistán', codigo: '996', iso: 'KG' },
+    { nombre: 'Kiribati', codigo: '686', iso: 'KI' },
+    { nombre: 'Kosovo', codigo: '383', iso: 'XK' },
+    { nombre: 'Kuwait', codigo: '965', iso: 'KW' },
+    { nombre: 'Laos', codigo: '856', iso: 'LA' },
+    { nombre: 'Lesoto', codigo: '266', iso: 'LS' },
+    { nombre: 'Letonia', codigo: '371', iso: 'LV' },
+    { nombre: 'Líbano', codigo: '961', iso: 'LB' },
+    { nombre: 'Liberia', codigo: '231', iso: 'LR' },
+    { nombre: 'Libia', codigo: '218', iso: 'LY' },
+    { nombre: 'Liechtenstein', codigo: '423', iso: 'LI' },
+    { nombre: 'Lituania', codigo: '370', iso: 'LT' },
+    { nombre: 'Luxemburgo', codigo: '352', iso: 'LU' },
+    { nombre: 'Macao', codigo: '853', iso: 'MO' },
+    { nombre: 'Macedonia del Norte', codigo: '389', iso: 'MK' },
+    { nombre: 'Madagascar', codigo: '261', iso: 'MG' },
+    { nombre: 'Malasia', codigo: '60', iso: 'MY' },
+    { nombre: 'Malaui', codigo: '265', iso: 'MW' },
+    { nombre: 'Maldivas', codigo: '960', iso: 'MV' },
+    { nombre: 'Mali', codigo: '223', iso: 'ML' },
+    { nombre: 'Malta', codigo: '356', iso: 'MT' },
+    { nombre: 'Marruecos', codigo: '212', iso: 'MA' },
+    { nombre: 'Martinica', codigo: '596', iso: 'MQ' },
+    { nombre: 'Mauricio', codigo: '230', iso: 'MU' },
+    { nombre: 'Mauritania', codigo: '222', iso: 'MR' },
+    { nombre: 'Mayotte', codigo: '262', iso: 'YT' },
+    { nombre: 'México', codigo: '52', iso: 'MX' },
+    { nombre: 'Micronesia', codigo: '691', iso: 'FM' },
+    { nombre: 'Moldavia', codigo: '373', iso: 'MD' },
+    { nombre: 'Mónaco', codigo: '377', iso: 'MC' },
+    { nombre: 'Mongolia', codigo: '976', iso: 'MN' },
+    { nombre: 'Montenegro', codigo: '382', iso: 'ME' },
+    { nombre: 'Montserrat', codigo: '1', iso: 'MS' },
+    { nombre: 'Mozambique', codigo: '258', iso: 'MZ' },
+    { nombre: 'Myanmar (Birmania)', codigo: '95', iso: 'MM' },
+    { nombre: 'Namibia', codigo: '264', iso: 'NA' },
+    { nombre: 'Nauru', codigo: '674', iso: 'NR' },
+    { nombre: 'Nepal', codigo: '977', iso: 'NP' },
+    { nombre: 'Nicaragua', codigo: '505', iso: 'NI' },
+    { nombre: 'Níger', codigo: '227', iso: 'NE' },
+    { nombre: 'Nigeria', codigo: '234', iso: 'NG' },
+    { nombre: 'Niue', codigo: '683', iso: 'NU' },
+    { nombre: 'Noruega', codigo: '47', iso: 'NO' },
+    { nombre: 'Nueva Caledonia', codigo: '687', iso: 'NC' },
+    { nombre: 'Nueva Zelanda', codigo: '64', iso: 'NZ' },
+    { nombre: 'Omán', codigo: '968', iso: 'OM' },
+    { nombre: 'Países Bajos', codigo: '31', iso: 'NL' },
+    { nombre: 'Pakistán', codigo: '92', iso: 'PK' },
+    { nombre: 'Palaos', codigo: '680', iso: 'PW' },
+    { nombre: 'Panamá', codigo: '507', iso: 'PA' },
+    { nombre: 'Papúa Nueva Guinea', codigo: '675', iso: 'PG' },
+    { nombre: 'Paraguay', codigo: '595', iso: 'PY' },
+    { nombre: 'Perú', codigo: '51', iso: 'PE' },
+    { nombre: 'Polinesia Francesa', codigo: '689', iso: 'PF' },
+    { nombre: 'Polonia', codigo: '48', iso: 'PL' },
+    { nombre: 'Portugal', codigo: '351', iso: 'PT' },
+    { nombre: 'Puerto Rico', codigo: '1', iso: 'PR' },
+    { nombre: 'Reino Unido', codigo: '44', iso: 'GB' },
+    { nombre: 'República Centroafricana', codigo: '236', iso: 'CF' },
+    { nombre: 'República Democrática del Congo', codigo: '243', iso: 'CD' },
+    { nombre: 'República Dominicana', codigo: '1', iso: 'DO' },
+    { nombre: 'Reunión', codigo: '262', iso: 'RE' },
+    { nombre: 'Ruanda', codigo: '250', iso: 'RW' },
+    { nombre: 'Rumanía', codigo: '40', iso: 'RO' },
+    { nombre: 'Rusia', codigo: '7', iso: 'RU' },
+    { nombre: 'Sáhara Occidental', codigo: '212', iso: 'EH' },
+    { nombre: 'Samoa', codigo: '685', iso: 'WS' },
+    { nombre: 'Samoa Americana', codigo: '1', iso: 'AS' },
+    { nombre: 'San Bartolomé', codigo: '590', iso: 'BL' },
+    { nombre: 'San Cristóbal y Nieves', codigo: '1', iso: 'KN' },
+    { nombre: 'San Marino', codigo: '378', iso: 'SM' },
+    { nombre: 'San Martín', codigo: '590', iso: 'MF' },
+    { nombre: 'San Pedro y Miquelón', codigo: '508', iso: 'PM' },
+    { nombre: 'San Vicente y las Granadinas', codigo: '1', iso: 'VC' },
+    { nombre: 'Santa Elena', codigo: '290', iso: 'SH' },
+    { nombre: 'Santa Lucía', codigo: '1', iso: 'LC' },
+    { nombre: 'Santo Tomé y Príncipe', codigo: '239', iso: 'ST' },
+    { nombre: 'Senegal', codigo: '221', iso: 'SN' },
+    { nombre: 'Serbia', codigo: '381', iso: 'RS' },
+    { nombre: 'Seychelles', codigo: '248', iso: 'SC' },
+    { nombre: 'Sierra Leona', codigo: '232', iso: 'SL' },
+    { nombre: 'Singapur', codigo: '65', iso: 'SG' },
+    { nombre: 'Sint Maarten', codigo: '1', iso: 'SX' },
+    { nombre: 'Siria', codigo: '963', iso: 'SY' },
+    { nombre: 'Somalia', codigo: '252', iso: 'SO' },
+    { nombre: 'Sri Lanka', codigo: '94', iso: 'LK' },
+    { nombre: 'Sudáfrica', codigo: '27', iso: 'ZA' },
+    { nombre: 'Sudán', codigo: '249', iso: 'SD' },
+    { nombre: 'Sudán del Sur', codigo: '211', iso: 'SS' },
+    { nombre: 'Suecia', codigo: '46', iso: 'SE' },
+    { nombre: 'Suiza', codigo: '41', iso: 'CH' },
+    { nombre: 'Surinam', codigo: '597', iso: 'SR' },
+    { nombre: 'Svalbard y Jan Mayen', codigo: '47', iso: 'SJ' },
+    { nombre: 'Tailandia', codigo: '66', iso: 'TH' },
+    { nombre: 'Taiwán', codigo: '886', iso: 'TW' },
+    { nombre: 'Tanzania', codigo: '255', iso: 'TZ' },
+    { nombre: 'Tayikistán', codigo: '992', iso: 'TJ' },
+    { nombre: 'Territorio Británico del Océano Índico', codigo: '246', iso: 'IO' },
+    { nombre: 'Territorios Palestinos', codigo: '970', iso: 'PS' },
+    { nombre: 'Timor-Leste', codigo: '670', iso: 'TL' },
+    { nombre: 'Togo', codigo: '228', iso: 'TG' },
+    { nombre: 'Tokelau', codigo: '690', iso: 'TK' },
+    { nombre: 'Tonga', codigo: '676', iso: 'TO' },
+    { nombre: 'Trinidad y Tobago', codigo: '1', iso: 'TT' },
+    { nombre: 'Túnez', codigo: '216', iso: 'TN' },
+    { nombre: 'Turkmenistán', codigo: '993', iso: 'TM' },
+    { nombre: 'Turquía', codigo: '90', iso: 'TR' },
+    { nombre: 'Tuvalu', codigo: '688', iso: 'TV' },
+    { nombre: 'Ucrania', codigo: '380', iso: 'UA' },
+    { nombre: 'Uganda', codigo: '256', iso: 'UG' },
+    { nombre: 'Uruguay', codigo: '598', iso: 'UY' },
+    { nombre: 'Uzbekistán', codigo: '998', iso: 'UZ' },
+    { nombre: 'Vanuatu', codigo: '678', iso: 'VU' },
+    { nombre: 'Venezuela', codigo: '58', iso: 'VE' },
+    { nombre: 'Vietnam', codigo: '84', iso: 'VN' },
+    { nombre: 'Wallis y Futuna', codigo: '681', iso: 'WF' },
+    { nombre: 'Yemen', codigo: '967', iso: 'YE' },
+    { nombre: 'Yibuti', codigo: '253', iso: 'DJ' },
+    { nombre: 'Zambia', codigo: '260', iso: 'ZM' },
+    { nombre: 'Zimbabue', codigo: '263', iso: 'ZW' }
+  ];
+
+  const TEL_DEFAULT_ISO = 'MX';
+
+  /* Se muestran primero ante empate de relevancia: son los tres mercados
+     desde los que llegan los leads, y con el filtro "1" o "5" quedarian
+     sepultados entre decenas de paises que comparten prefijo. */
+  const TEL_PRIORIDAD = ['MX', 'US', 'CN'];
+
+  /* Sin acentos y en minusculas, para que "mexico" encuentre "México". */
+  function telNorm(str) {
+    var s = String(str == null ? '' : str).toLowerCase();
+    return s.normalize ? s.normalize('NFD').replace(/[̀-ͯ]/g, '') : s;
+  }
+
+  function telLabel(pais) {
+    return pais.nombre + ' +' + pais.codigo;
+  }
+
+  function telPaisPorIso(iso) {
+    for (var i = 0; i < TEL_PAISES.length; i++) {
+      if (TEL_PAISES[i].iso === iso) return TEL_PAISES[i];
+    }
+    return TEL_PAISES[0];
+  }
+
+  /* Ordena por que tan directa es la coincidencia: codigo exacto, nombre
+     que empieza igual, nombre que la contiene, codigo que empieza igual. */
+  function telFiltrar(query) {
+    var q = telNorm(query).trim();
+    if (!q) return TEL_PAISES.slice();
+
+    /* "+1" y "1" son la misma busqueda; el usuario escribe cualquiera. */
+    var qCodigo = q.replace(/[^0-9]/g, '');
+    var out = [];
+
+    TEL_PAISES.forEach(function (pais) {
+      var nombre = telNorm(pais.nombre);
+      var rango = -1;
+
+      if (qCodigo && pais.codigo === qCodigo)        rango = 0;
+      else if (nombre.indexOf(q) === 0)              rango = 1;
+      else if (nombre.indexOf(q) > 0)                rango = 2;
+      else if (qCodigo && pais.codigo.indexOf(qCodigo) === 0) rango = 3;
+
+      if (rango >= 0) out.push({ pais: pais, rango: rango });
+    });
+
+    out.sort(function (a, b) {
+      if (a.rango !== b.rango) return a.rango - b.rango;
+      var pa = TEL_PRIORIDAD.indexOf(a.pais.iso);
+      var pb = TEL_PRIORIDAD.indexOf(b.pais.iso);
+      if (pa !== pb) return (pa < 0 ? 99 : pa) - (pb < 0 ? 99 : pb);
+      return a.pais.nombre.localeCompare(b.pais.nombre, 'es');
+    });
+
+    return out.map(function (item) { return item.pais; });
+  }
+
+  /* El combobox se localiza por el contenedor, no por convencion de id. */
+  function telParts(telId) {
+    var input = document.getElementById(telId);
+    var field = (input && input.closest) ? input.closest('.tel-field') : null;
+    return {
+      input: input,
+      cc:    field ? field.querySelector('.tel-cc__input') : null
+    };
+  }
+
+  /* El codigo vive en el dataset del combobox, no en un campo del form:
+     no es un dato que el usuario escriba y no debe viajar en el payload. */
+  function telCode(parts) {
+    return (parts.cc && parts.cc.dataset.codigo) ? parts.cc.dataset.codigo : '';
+  }
+
+  /* "+" + codigo + digitos. Ejemplo: 52 y "81 2198 5802" dan
+     "+528121985802". Si el navegador trae en cache un HTML sin combobox
+     se mandan los digitos solos: inventar un pais seria peor que omitirlo. */
+  function composeTel(telId) {
+    var parts = telParts(telId);
+    if (!parts.input) return '';
+    var digits = parts.input.value.replace(/\D/g, '');
+    if (!digits) return '';
+    var code = telCode(parts);
+    return code ? '+' + code + digits : digits;
+  }
+
+  function initTelCombobox(root) {
+    var input = root.querySelector('.tel-cc__input');
+    var list  = root.querySelector('.tel-cc__list');
+    if (!input || !list) return;
+
+    var visibles = [];
+    var activo   = -1;
+    var abierto  = false;
+    var seleccionado = telPaisPorIso(TEL_DEFAULT_ISO);
+
+    function aplicar(pais) {
+      seleccionado = pais;
+      input.value = telLabel(pais);
+      input.dataset.codigo = pais.codigo;
+      input.dataset.iso    = pais.iso;
+    }
+
+    function pintar() {
+      var html = '';
+      visibles.forEach(function (pais, i) {
+        html += '<li class="tel-cc__opt" role="option" id="' + list.id + '-opt-' + i +
+                '" data-iso="' + pais.iso + '" aria-selected="' +
+                (pais.iso === seleccionado.iso ? 'true' : 'false') + '">' +
+                '<span class="tel-cc__nombre">' + pais.nombre + '</span>' +
+                '<span class="tel-cc__codigo">+' + pais.codigo + '</span></li>';
+      });
+      list.innerHTML = html || '<li class="tel-cc__vacio" role="presentation">Sin resultados</li>';
+      marcar(visibles.length ? 0 : -1);
+    }
+
+    function marcar(i) {
+      activo = i;
+      var opts = list.querySelectorAll('.tel-cc__opt');
+      Array.prototype.forEach.call(opts, function (el, idx) {
+        if (idx === activo) el.classList.add('is-active');
+        else el.classList.remove('is-active');
+      });
+      if (activo >= 0 && opts[activo]) {
+        input.setAttribute('aria-activedescendant', opts[activo].id);
+        /* scrollIntoView movería tambien la pagina; se ajusta solo la lista. */
+        var el = opts[activo];
+        if (el.offsetTop < list.scrollTop) list.scrollTop = el.offsetTop;
+        else if (el.offsetTop + el.offsetHeight > list.scrollTop + list.clientHeight) {
+          list.scrollTop = el.offsetTop + el.offsetHeight - list.clientHeight;
+        }
+      } else {
+        input.removeAttribute('aria-activedescendant');
+      }
+    }
+
+    function abrir() {
+      if (abierto) return;
+      abierto = true;
+      visibles = telFiltrar('');
+      /* Visible antes de resaltar: con display:none las medidas valen 0 y
+         la lista no alcanzaria a bajar hasta la opcion seleccionada. */
+      list.hidden = false;
+      input.setAttribute('aria-expanded', 'true');
+      pintar();
+      var idx = -1;
+      visibles.forEach(function (p, i) { if (p.iso === seleccionado.iso) idx = i; });
+      if (idx >= 0) marcar(idx);
+    }
+
+    /* Cerrar siempre restaura la ultima seleccion valida: el control nunca
+       se queda vacio ni con texto a medio escribir. */
+    function cerrar() {
+      abierto = false;
+      list.hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+      aplicar(seleccionado);
+    }
+
+    function elegir(i) {
+      if (i < 0 || i >= visibles.length) return cerrar();
+      aplicar(visibles[i]);
+      cerrar();
+    }
+
+    input.addEventListener('focus', function () {
+      abrir();
+      input.select();
+    });
+
+    input.addEventListener('mousedown', function () {
+      if (!abierto) return;   /* el focus ya abrio la lista */
+      cerrar();
+      input.blur();
+    });
+
+    input.addEventListener('input', function () {
+      if (!abierto) abrir();
+      visibles = telFiltrar(input.value);
+      pintar();
+    });
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!abierto) { abrir(); return; }
+        if (!visibles.length) return;
+        var next = activo + (e.key === 'ArrowDown' ? 1 : -1);
+        if (next < 0) next = visibles.length - 1;
+        if (next >= visibles.length) next = 0;
+        marcar(next);
+      } else if (e.key === 'Enter') {
+        if (abierto) { e.preventDefault(); elegir(activo); }
+      } else if (e.key === 'Escape') {
+        if (abierto) { e.preventDefault(); cerrar(); }
+      } else if (e.key === 'Tab') {
+        if (abierto) cerrar();
+      }
+    });
+
+    /* mousedown y no click: el blur del input llegaria antes que el click
+       y cerraria la lista descartando la opcion que se acaba de tocar. */
+    list.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      var opt = e.target.closest ? e.target.closest('.tel-cc__opt') : null;
+      if (!opt) return;
+      var opts = Array.prototype.slice.call(list.querySelectorAll('.tel-cc__opt'));
+      elegir(opts.indexOf(opt));
+    });
+
+    document.addEventListener('mousedown', function (e) {
+      if (abierto && !root.contains(e.target)) cerrar();
+    });
+
+    input.addEventListener('blur', function () {
+      if (abierto) cerrar();
+    });
+
+    aplicar(seleccionado);
+  }
+
+  function initTelFields() {
+    var roots = document.querySelectorAll('.tel-cc');
+    Array.prototype.forEach.call(roots, function (root) { initTelCombobox(root); });
+  }
+
   /* ── CALCULATOR ────────────────────────────────────────────── */
   function initCalc() {
     var gateForm  = document.getElementById('gate-form');
@@ -201,7 +678,10 @@
           caras:    calc.caras,
           piezas:   calc.piezas,
           total:    calc.total,
-          gclid:    localStorage.getItem('sp_gclid') || ''
+          gclid:    localStorage.getItem('sp_gclid') || '',
+          attribution: window.SP_getAttribution
+            ? window.SP_getAttribution()
+            : { first: null, last: null }
         })
       }).then(function (res) {
         if (!res.ok) throw new Error('Request failed');
@@ -233,9 +713,10 @@
         var empresa  = val('g-empresa').trim();
         var telefono = val('g-telefono').trim();
         var email    = val('g-email').trim();
+        var gTelDigits = telefono.replace(/\D/g, '');
         if (!nombre)   gErrors.push('Ingresa tu nombre completo.');
         if (!empresa)  gErrors.push('Ingresa el nombre de tu empresa.');
-        if (!telefono) gErrors.push('Ingresa tu teléfono.');
+        if (!gTelDigits) gErrors.push('Ingresa tu teléfono.');
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) gErrors.push('Ingresa un correo electrónico válido.');
         var gateErrEl = document.getElementById('gate-error');
         if (gErrors.length) {
@@ -256,7 +737,7 @@
         var lead = {
           nombre:   val('g-nombre'),
           empresa:  val('g-empresa'),
-          telefono: val('g-telefono'),
+          telefono: composeTel('g-telefono'),
           email:    val('g-email'),
           comms:    commsEl ? commsEl.checked : false,
           ts:       new Date().toISOString()
@@ -272,7 +753,10 @@
             email:    lead.email,
             comms:    lead.comms,
             gclid:    localStorage.getItem('sp_gclid') || '',
-            flow:     'calculadora'
+            flow:     'calculadora',
+            attribution: window.SP_getAttribution
+              ? window.SP_getAttribution()
+              : { first: null, last: null }
           })
         })
           .then(function (res) {
@@ -430,10 +914,11 @@
       var empresa  = gv('c-empresa');
       var telefono = gv('c-telefono');
       var email    = gv('c-email');
+      var cTelDigits = telefono.replace(/\D/g, '');
       var errors = [];
       if (!nombre)   errors.push('Ingresa tu nombre.');
       if (!empresa)  errors.push('Ingresa el nombre de tu empresa.');
-      if (!telefono) errors.push('Ingresa tu teléfono.');
+      if (!cTelDigits) errors.push('Ingresa tu teléfono.');
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Ingresa un correo electrónico válido.');
       var errEl = document.getElementById('contact-error');
       if (errors.length) {
@@ -454,12 +939,15 @@
       var payload = {
         nombre:   nombre,
         empresa:  empresa,
-        telefono: telefono,
+        telefono: composeTel('c-telefono'),
         email:    email,
         mensaje:  gv('c-mensaje'),
         comms:    commsEl ? commsEl.checked : false,
         gclid:    localStorage.getItem('sp_gclid') || '',
-        flow:     'contacto'
+        flow:     'contacto',
+        attribution: window.SP_getAttribution
+          ? window.SP_getAttribution()
+          : { first: null, last: null }
       };
 
       fetch('/api/contact', {
@@ -544,20 +1032,98 @@
     }
   }
 
-  /* ── GCLID CAPTURE ─────────────────────────────────────────── */
-  function captureGclid() {
+  /* ── ATRIBUCION (ADS + UTM) ────────────────────────────────── */
+  const ATTR_TTL_MS   = 90 * 24 * 60 * 60 * 1000;   /* 90 dias */
+  const ATTR_ADS_KEYS = ['gclid', 'gbraid', 'wbraid'];
+  const ATTR_UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+
+  /* Borra una clave sin propagar errores (modo privado) */
+  function attrRemove(key) {
+    try { localStorage.removeItem(key); } catch (e) { /* no-op */ }
+  }
+
+  /* Lee un toque guardado; si caduco o es ilegible, lo borra y devuelve null */
+  function attrRead(key) {
+    var raw;
+    try { raw = localStorage.getItem(key); } catch (e) { return null; }
+    if (!raw) return null;
+
+    var touch = null;
+    try { touch = JSON.parse(raw); } catch (e) { touch = null; }
+    if (!touch || typeof touch !== 'object' || !touch.ts) {
+      attrRemove(key);
+      return null;
+    }
+
+    var ts = Date.parse(touch.ts);
+    if (isNaN(ts) || (Date.now() - ts) > ATTR_TTL_MS) {
+      attrRemove(key);
+      return null;
+    }
+    return touch;
+  }
+
+  function attrWrite(key, touch) {
+    try { localStorage.setItem(key, JSON.stringify(touch)); } catch (e) { /* no-op */ }
+  }
+
+  /* Toque "con senal": trae parametros de Ads, utm_ o viene de otro dominio */
+  function attrHasSignal(touch, referrer) {
+    var i;
+    for (i = 0; i < ATTR_ADS_KEYS.length; i++) {
+      if (touch[ATTR_ADS_KEYS[i]]) return true;
+    }
+    for (i = 0; i < ATTR_UTM_KEYS.length; i++) {
+      if (touch[ATTR_UTM_KEYS[i]]) return true;
+    }
+    if (referrer) {
+      try {
+        if (new URL(referrer).hostname !== window.location.hostname) return true;
+      } catch (e) { /* referrer no parseable: sin senal */ }
+    }
+    return false;
+  }
+
+  function initAttribution() {
     var params = new URLSearchParams(window.location.search);
-    var gclid = params.get('gclid');
-    if (gclid) {
-      localStorage.setItem('sp_gclid', gclid);
-      localStorage.setItem('sp_gclid_ts', new Date().toISOString());
+    var touch  = {};
+
+    ATTR_ADS_KEYS.concat(ATTR_UTM_KEYS).forEach(function (key) {
+      touch[key] = params.get(key) || '';
+    });
+
+    var referrer = document.referrer || '';
+    touch.referrer = referrer;
+    touch.landing  = window.location.pathname;
+    touch.ts       = new Date().toISOString();
+
+    /* Compatibilidad: los formularios siguen leyendo sp_gclid */
+    if (touch.gclid) {
+      try {
+        localStorage.setItem('sp_gclid', touch.gclid);
+        localStorage.setItem('sp_gclid_ts', touch.ts);
+      } catch (e) { /* no-op */ }
     }
     /* If no gclid in the URL but one is already stored, keep it */
+
+    if (!attrHasSignal(touch, referrer)) return;
+
+    /* El primer toque solo se escribe si no hay uno vigente */
+    if (!attrRead('sp_attr_first')) attrWrite('sp_attr_first', touch);
+    attrWrite('sp_attr_last', touch);
   }
+
+  window.SP_getAttribution = function () {
+    return {
+      first: attrRead('sp_attr_first'),
+      last:  attrRead('sp_attr_last')
+    };
+  };
 
   /* ── INIT ──────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
-    captureGclid();
+    initAttribution();
+    initTelFields();
     initProgress();
     initNav();
     initMobile();

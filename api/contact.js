@@ -78,6 +78,234 @@ function buildCrmPayload(flow, body) {
   return payload;
 }
 
+/* Etiqueta deliberada. Un toque sin senal solo significa que el navegador
+   llego sin parametros ni referrer utilizable (marcador directo, app,
+   correo, https→http): no dice nada sobre el origen real del lead, asi
+   que la etiqueta no debe sugerir que marketing no lo genero. */
+const CHANNEL_UNKNOWN = 'Directo o sin determinar';
+
+const ADS_KEYS = ['gclid', 'gbraid', 'wbraid'];
+const SOCIAL_NAMES = ['facebook', 'instagram', 'linkedin'];
+
+/* El toque lo arma el cliente: cualquier clave puede venir ausente, vacia,
+   con espacios o con otro tipo. Se normaliza a string recortado. */
+function attrValue(touch, key) {
+  const raw = touch ? touch[key] : undefined;
+  if (raw === undefined || raw === null) return '';
+  return String(raw).trim();
+}
+
+/* 't.co' se compara como host completo, no como subcadena: 'cliente.com',
+   'print.com.mx' y cualquier dominio terminado en 't.com' la contienen y
+   acabarian en Redes sociales. Los otros tres nombres son distintivos. */
+function isSocialHost(hostname) {
+  if (hostname === 't.co' || hostname.endsWith('.t.co')) return true;
+  return SOCIAL_NAMES.some(name => hostname.includes(name));
+}
+
+/* Clasifica un toque de atribucion. Nunca lanza: un referrer corrupto
+   cae a CHANNEL_UNKNOWN en vez de tumbar el envio del lead. */
+function classifyChannel(touch) {
+  if (!touch) return CHANNEL_UNKNOWN;
+
+  if (ADS_KEYS.some(key => attrValue(touch, key))) return 'Google Ads';
+
+  const utmSource = attrValue(touch, 'utm_source');
+  if (utmSource) {
+    const utmMedium = attrValue(touch, 'utm_medium');
+    return utmMedium
+      ? `Campaña: ${utmSource} / ${utmMedium}`
+      : `Campaña: ${utmSource}`;
+  }
+
+  const referrer = attrValue(touch, 'referrer');
+  if (referrer) {
+    let hostname = '';
+    try {
+      hostname = new URL(referrer).hostname;
+    } catch (err) {
+      hostname = '';
+    }
+    if (hostname) {
+      if (hostname.includes('google.')) return 'Búsqueda orgánica (Google)';
+      if (hostname.includes('bing.'))   return 'Búsqueda orgánica (Bing)';
+      if (isSocialHost(hostname))       return `Redes sociales (${hostname})`;
+      return `Referencia: ${hostname}`;
+    }
+  }
+
+  return CHANNEL_UNKNOWN;
+}
+
+/* Resumen plano y siempre completo: toda clave existe aunque el body no
+   traiga attribution, para que quien lo consuma no tenga que verificar. */
+function buildAttributionSummary(attribution) {
+  return {
+    canalPrimero:   classifyChannel(attribution?.first),
+    canalUltimo:    classifyChannel(attribution?.last),
+    primerToqueTs:  attribution?.first?.ts || '',
+    ultimoToqueTs:  attribution?.last?.ts || '',
+    landingPrimero: attribution?.first?.landing || '',
+    campana:        attribution?.last?.utm_campaign
+                    || attribution?.first?.utm_campaign
+                    || ''
+  };
+}
+
+/* ── CORREO ──────────────────────────────────────────────────────
+   Todo en tablas y con estilos inline: Outlook (motor de Word) ignora
+   las hojas de estilo, flexbox y grid. */
+const MAIL_VERDE  = '#16A34A';
+const MAIL_GRIS   = '#6B7280';
+const MAIL_TINTA  = '#111827';
+const MAIL_BORDE  = '#E5E7EB';
+const MAIL_FUENTE = 'Arial, Helvetica, sans-serif';
+
+function mailEnlace(href, texto) {
+  return `<a href="${escapeHtml(href)}" style="color:${MAIL_VERDE};font-weight:bold;text-decoration:none;">${escapeHtml(texto)}</a>`;
+}
+
+/* wa.me se omite si el telefono no viene en formato internacional: un
+   enlace mal armado abre un chat con un numero que no existe y el
+   vendedor concluye que el lead no contesta. Los envios viejos (HTML en
+   cache, sin combobox) llegan sin '+' y caen aqui. */
+function mailAcciones(telefono, email) {
+  const tel = telefono === undefined || telefono === null ? '' : String(telefono).trim();
+  const digitos = tel.replace(/\D/g, '');
+  const partes = [];
+
+  if (tel.charAt(0) === '+' && digitos.length >= 8) {
+    partes.push(mailEnlace(`https://wa.me/${digitos}`, 'Enviar WhatsApp'));
+  }
+  if (tel) {
+    partes.push(mailEnlace(`tel:${tel}`, 'Llamar'));
+  }
+  if (email) {
+    partes.push(mailEnlace(
+      `mailto:${email}?subject=Steel%20Paint%20—%20seguimiento%20a%20tu%20solicitud`,
+      'Responder por correo'
+    ));
+  }
+  return partes.join(' · ');
+}
+
+/* Etiqueta gris arriba, valor en negro abajo. valorHtml ya viene escapado
+   o es HTML armado aqui (los enlaces). */
+function mailFila(etiqueta, valorHtml) {
+  return `
+              <tr>
+                <td style="padding:0 0 14px 0;font-family:${MAIL_FUENTE};font-size:12px;line-height:1.4;color:${MAIL_GRIS};">
+                  ${escapeHtml(etiqueta)}<br>
+                  <span style="font-size:15px;line-height:1.5;color:${MAIL_TINTA};font-weight:bold;">${valorHtml}</span>
+                </td>
+              </tr>`;
+}
+
+function mailSeccion(contenido, fondo) {
+  const estiloFondo = fondo ? `background:${fondo};` : '';
+  return `
+        <tr>
+          <td style="${estiloFondo}padding:24px;border-top:1px solid ${MAIL_BORDE};">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${contenido}
+            </table>
+          </td>
+        </tr>`;
+}
+
+function mailTitulo(texto) {
+  return `
+              <tr>
+                <td style="padding:0 0 14px 0;font-family:${MAIL_FUENTE};font-size:11px;line-height:1.4;color:${MAIL_GRIS};letter-spacing:0.08em;text-transform:uppercase;">
+                  ${escapeHtml(texto)}
+                </td>
+              </tr>`;
+}
+
+function buildEmailHtml(flow, body, crm, attr) {
+  const contacto = mailFila('Nombre', escapeHtml(body.nombre)) +
+    mailFila('Empresa', escapeHtml(body.empresa)) +
+    mailFila('Teléfono', escapeHtml(body.telefono)) +
+    mailFila('Correo', escapeHtml(body.email)) +
+    mailFila('Consentimiento', body.comms ? 'Sí' : 'No');
+
+  const acciones = mailAcciones(body.telefono, body.email);
+  const accionesSeccion = acciones
+    ? mailSeccion(`
+              <tr>
+                <td style="font-family:${MAIL_FUENTE};font-size:15px;line-height:1.6;color:${MAIL_TINTA};">${acciones}</td>
+              </tr>`)
+    : '';
+
+  const mensajeSeccion = body.mensaje
+    ? mailSeccion(mailTitulo('Mensaje') + `
+              <tr>
+                <td style="font-family:${MAIL_FUENTE};font-size:15px;line-height:1.6;color:${MAIL_TINTA};">${escapeHtml(body.mensaje)}</td>
+              </tr>`)
+    : '';
+
+  const cotizacionSeccion = flow === 'cotizacion'
+    ? mailSeccion(mailTitulo('Datos de cotización') +
+        mailFila('Largo', `${escapeHtml(body.largo)} m`) +
+        mailFila('Ancho', `${escapeHtml(body.ancho)} m`) +
+        mailFila('Caras', escapeHtml(body.caras)) +
+        mailFila('Piezas', escapeHtml(body.piezas)) +
+        mailFila('Total estimado', escapeHtml(body.total)))
+    : '';
+
+  /* El ultimo toque va destacado: es el que explica por que escribio hoy. */
+  let origen = mailTitulo('Origen del lead') + `
+              <tr>
+                <td style="padding:0 0 14px 0;font-family:${MAIL_FUENTE};font-size:12px;line-height:1.4;color:${MAIL_GRIS};">
+                  Último contacto<br>
+                  <span style="font-size:18px;line-height:1.4;color:${MAIL_TINTA};font-weight:bold;">${escapeHtml(attr.canalUltimo)}</span>
+                </td>
+              </tr>` +
+    mailFila('Primer contacto', escapeHtml(attr.canalPrimero));
+  if (attr.campana) origen += mailFila('Campaña', escapeHtml(attr.campana));
+  if (attr.landingPrimero) origen += mailFila('Página de entrada', escapeHtml(attr.landingPrimero));
+
+  const crmSeccion = crm.ok
+    ? ''
+    : mailSeccion(`
+              <tr>
+                <td style="font-family:${MAIL_FUENTE};font-size:14px;line-height:1.6;color:#B91C1C;">
+                  <strong>CRM:</strong> este lead NO entró a la plataforma — ${escapeHtml(crm.reason)}
+                </td>
+              </tr>`, '#FEF2F2');
+
+  /* Documento completo y con charset declarado: los acentos del espanol
+     dependen de el si el cliente de correo ignora la cabecera MIME. */
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHtml(SUBJECT_BY_FLOW[flow])}</title>
+</head>
+<body style="margin:0;padding:0;background:#F3F4F6;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F3F4F6;padding:24px 0;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#FFFFFF;border:1px solid ${MAIL_BORDE};">
+        <tr>
+          <td style="background:${MAIL_VERDE};padding:24px;">
+            <div style="font-family:${MAIL_FUENTE};font-size:26px;line-height:1.2;font-weight:bold;color:#FFFFFF;">Steel Paint</div>
+            <div style="font-family:${MAIL_FUENTE};font-size:14px;line-height:1.4;color:#DCFCE7;padding-top:4px;">${escapeHtml(SUBJECT_BY_FLOW[flow])}</div>
+          </td>
+        </tr>${mailSeccion(contacto)}${accionesSeccion}${mensajeSeccion}${cotizacionSeccion}${mailSeccion(origen, '#F9FAFB')}${crmSeccion}
+        <tr>
+          <td style="padding:18px 24px;border-top:1px solid ${MAIL_BORDE};font-family:${MAIL_FUENTE};font-size:12px;line-height:1.5;color:${MAIL_GRIS};">
+            Enviado desde steel-paint.com.mx
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>`;
+}
+
 /* Aislado: nunca lanza. Devuelve { ok, reason } para que el asunto del
    correo pueda marcar el lead que no entro a la plataforma. */
 async function sendToCrm(flow, payload) {
@@ -140,7 +368,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true });
   }
 
-  const { nombre, empresa, telefono, email, mensaje, largo, ancho, caras, piezas, total, gclid, comms } = req.body;
+  const { nombre, empresa } = req.body;
 
   const flow = resolveFlow(req.body);
 
@@ -149,22 +377,8 @@ export default async function handler(req, res) {
      igual pase lo que pase aqui. */
   const crm = await sendToCrm(flow, buildCrmPayload(flow, req.body));
 
-  const mensajeSection = mensaje
-    ? `<p><strong>Mensaje:</strong> ${escapeHtml(mensaje)}</p>`
-    : '';
-  const calcSection = flow === 'cotizacion'
-    ? `
-        <h3 style="margin-top:1.5rem;">Datos de cotización</h3>
-        <p><strong>Largo:</strong> ${largo} m</p>
-        <p><strong>Ancho:</strong> ${ancho} m</p>
-        <p><strong>Caras:</strong> ${caras}</p>
-        <p><strong>Piezas:</strong> ${piezas}</p>
-        <p><strong>Total estimado:</strong> ${total}</p>
-      `
-    : '';
-  const crmSection = crm.ok
-    ? ''
-    : `<p style="margin-top:1.5rem;color:#c0392b;"><strong>CRM:</strong> este lead NO entró a la plataforma — ${escapeHtml(crm.reason)}</p>`;
+  const attr = buildAttributionSummary(req.body.attribution);
+  const html = buildEmailHtml(flow, req.body, crm, attr);
 
   const baseSubject = `${SUBJECT_BY_FLOW[flow]}: ${nombre} / ${empresa}`;
   const subject = crm.ok ? baseSubject : `[CRM-ERROR] ${baseSubject}`;
@@ -180,18 +394,7 @@ export default async function handler(req, res) {
         from: 'Steel Paint <contacto@mail.steel-paint.com.mx>',
         to: ['hola@scndal.com', 'marcelo.steelpaint@gmail.com', 'marcelo@steel-paint.com.mx', 'andrea.r@scndal.com', 'michel.l@scndal.com'],
         subject: subject,
-        html: `
-        <h2>Nuevo mensaje desde steel-paint.com.mx</h2>
-        <p><strong>Nombre:</strong> ${escapeHtml(nombre)}</p>
-        <p><strong>Empresa:</strong> ${escapeHtml(empresa)}</p>
-        <p><strong>Teléfono:</strong> ${escapeHtml(telefono)}</p>
-        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
-        <p><strong>Gclid:</strong> ${gclid ? escapeHtml(gclid) : 'N/A (no vino de clic en Ads)'}</p>
-        <p><strong>Consentimiento:</strong> ${comms ? 'Sí' : 'No'}</p>
-        ${mensajeSection}
-        ${calcSection}
-        ${crmSection}
-      `
+        html: html
       })
     });
 

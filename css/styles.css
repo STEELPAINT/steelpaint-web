@@ -853,6 +853,79 @@ p  { color: var(--text-2); line-height: 1.75; }
 .form-group textarea::placeholder { color: var(--text-3); }
 .form-group textarea { resize: vertical; min-height: 110px; }
 
+/* Telefono con codigo de pais. El combobox no crece; el numero ocupa el
+   resto y baja de linea si no cabe. Borde, fondo, radio y alto los heredan
+   de las reglas de .form-group de arriba. */
+.tel-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+.tel-cc {
+  position: relative;
+  flex: 0 0 10.5rem;
+  width: 10.5rem;
+}
+.form-group .tel-cc__input {
+  width: 100%;
+  cursor: pointer;
+  text-overflow: ellipsis;
+}
+.form-group .tel-field__num {
+  flex: 1 1 9rem;
+  width: auto;
+  min-width: 0;
+}
+
+/* La lista flota sobre el formulario: si empujara el contenido, abrirla
+   movería el boton de enviar bajo el cursor. */
+.tel-cc__list {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+}
+.tel-cc__list[hidden] { display: none; }
+.tel-cc__opt {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--r);
+  font-size: 0.85rem;
+  color: var(--text-1);
+  cursor: pointer;
+}
+.tel-cc__opt.is-active { background: var(--bg-2); }
+.tel-cc__opt[aria-selected="true"] .tel-cc__nombre { font-weight: 600; }
+.tel-cc__nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tel-cc__codigo { flex: 0 0 auto; color: var(--text-3); font-size: 0.8rem; }
+.tel-cc__vacio {
+  padding: 0.6rem 0.65rem;
+  font-size: 0.85rem;
+  color: var(--text-3);
+  list-style: none;
+}
+
+/* A 380px la fila no cabe: el combobox pasa a ancho completo y el numero
+   baja a la linea de abajo, en vez de quedar de 3 caracteres. */
+@media (max-width: 420px) {
+  .tel-cc { flex: 1 1 100%; width: 100%; }
+  .form-group .tel-field__num { flex: 1 1 100%; }
+}
+
 /* ── FOOTER ─────────────────────────────────────────────────── */
 .footer {
   background: var(--bg-0);
