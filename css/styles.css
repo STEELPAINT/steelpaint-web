@@ -163,6 +163,18 @@ p  { color: var(--text-2); line-height: 1.75; }
 }
 .btn-lg { padding: 0.95rem 2.2rem; font-size: 1rem; }
 
+/* Sin esto un boton deshabilitado se ve igual que uno activo y la gente lo
+   vuelve a tocar. El cursor y el filtro avisan que ya no responde. */
+.btn:disabled,
+.btn[disabled] {
+  opacity: 0.55;
+  filter: grayscale(0.6);
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+  transform: none;
+}
+
 /* ── SECTION HEADER ─────────────────────────────────────────── */
 .sh { margin-bottom: clamp(2.5rem,5vw,4rem); }
 .sh.center { text-align: center; }
@@ -346,6 +358,42 @@ p  { color: var(--text-2); line-height: 1.75; }
   line-height: 1.8;
 }
 .hero__actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+/* ── CONTACTO EN EL HERO (SOLO MOVIL, VERSION NORMAL) ────────── */
+/* En movil el "Contactanos" del nav se oculta y la primera pantalla se
+   queda sin ninguna via de contacto: este CTA la repone. Aparece justo en
+   el breakpoint donde desaparece el del nav.
+   line-height explicito: el UA le pone 'normal' a los <button> y quedaria
+   5.6px mas bajo que el <a> de la calculadora, que si hereda el 1.6 del
+   documento. Se acota a este boton: ponerlo en .btn cambiaria la altura de
+   todos los <button> del sitio, incluido el de la variante #ads. */
+.hero__cta-contacto { display: none; line-height: 1.6; }
+@media (max-width: 768px) {
+  .hero__cta-contacto { display: inline-flex; }
+}
+/* La variante #ads ya tiene su propio CTA de cotizacion: no se toca. */
+.v-ads .hero__cta-contacto { display: none; }
+
+/* A 380px el hero ya llegaba justo al pliegue con dos botones, asi que el
+   tercero no cabia apilado. "Ver nuestro proceso" cede su fila: es la
+   accion que el propio scroll ya hace, y sigue disponible en el menu como
+   "Que hacemos?". El resto es compactar sin tocar tipografias.
+   Acotado a :root:not(.v-ads) para no alterar la variante. */
+@media (max-width: 560px) {
+  :root:not(.v-ads) .hero__cta-proceso { display: none; }
+  :root:not(.v-ads) .hero__actions { gap: 0.75rem; }
+  /* 2.5rem de separacion es holgado a esta anchura; recortarlo da margen
+     al pliegue sin tocar tamaños de letra ni interlineado. Sin acotar a la
+     version normal: la variante #ads tambien rozaba el pliegue aqui, y es
+     el unico ajuste de los de este bloque que le conviene. */
+  .hero__sub { margin-bottom: 1.5rem; }
+  :root:not(.v-ads) .hero__actions .btn-lg {
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+    width: 100%;
+    justify-content: center;
+  }
+}
 .hero__scroll {
   position: absolute;
   bottom: 2.5rem; left: 50%;
@@ -853,6 +901,16 @@ p  { color: var(--text-2); line-height: 1.75; }
 .form-group textarea::placeholder { color: var(--text-3); }
 .form-group textarea { resize: vertical; min-height: 110px; }
 
+/* iOS hace zoom al enfocar cualquier campo con menos de 16px. Solo en
+   movil: en escritorio se conserva el 0.9rem del diseño. El 16px va en px
+   y no en rem para que no dependa del tamaño base del documento. */
+@media (max-width: 768px) {
+  .form-group input,
+  .form-group textarea,
+  .form-group select,
+  .tel-cc__input { font-size: 16px; }
+}
+
 /* Telefono con codigo de pais. El combobox no crece; el numero ocupa el
    resto y baja de linea si no cabe. Borde, fondo, radio y alto los heredan
    de las reglas de .form-group de arriba. */
@@ -911,6 +969,15 @@ p  { color: var(--text-2); line-height: 1.75; }
 .tel-cc__opt[aria-selected="true"] .tel-cc__nombre { font-weight: 600; }
 .tel-cc__nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tel-cc__codigo { flex: 0 0 auto; color: var(--text-3); font-size: 0.8rem; }
+
+/* Despues de las reglas de arriba a proposito: declaradas antes perdian el
+   desempate de orden con .tel-cc__opt y se quedaban en 13.6px. Las opciones
+   no disparan el zoom de iOS, pero al lado de campos de 16px se veian
+   diminutas. */
+@media (max-width: 768px) {
+  .tel-cc__opt    { font-size: 15px; }
+  .tel-cc__codigo { font-size: 14px; }
+}
 .tel-cc__vacio {
   padding: 0.6rem 0.65rem;
   font-size: 0.85rem;
@@ -920,7 +987,9 @@ p  { color: var(--text-2); line-height: 1.75; }
 
 /* A 380px la fila no cabe: el combobox pasa a ancho completo y el numero
    baja a la linea de abajo, en vez de quedar de 3 caracteres. */
-@media (max-width: 420px) {
+/* 560 y no 420: los iPhone grandes miden 414-430px de ancho y quedaban
+   fuera, con la lista a 168px flotando suelta al lado del campo. */
+@media (max-width: 560px) {
   .tel-cc { flex: 1 1 100%; width: 100%; }
   .form-group .tel-field__num { flex: 1 1 100%; }
 }
@@ -1006,6 +1075,14 @@ p  { color: var(--text-2); line-height: 1.75; }
    la pagina no brinque al desaparecer la barra. */
 body.has-modal { overflow: hidden; }
 
+/* Pantalla de respaldo de WhatsApp: es una confirmacion, no un formulario,
+   asi que el texto va centrado. Los botones ya son de ancho completo. */
+#wa-paso-2 {
+  text-align: center;
+  padding: 0.5rem 0 0.25rem;
+}
+#wa-paso-2 p { margin-left: auto; margin-right: auto; max-width: 34ch; }
+
 @media (max-width: 640px) {
   .modal { padding: 0; }
   .modal__dialog {
@@ -1019,12 +1096,75 @@ body.has-modal { overflow: hidden; }
   .cta-card__btn { width: 100%; justify-content: center; }
 }
 
+/* ── BOTON FLOTANTE DE WHATSAPP ─────────────────────────────── */
+/* z-index por debajo del modal (200) y del menu movil (190) a proposito:
+   cuando cualquiera de los dos se abre, el flotante queda tapado o
+   escondido en vez de estorbar encima. */
+.wa-fab {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 150;
+  /* 56px: por encima del minimo de 44x44 para objetivos tactiles. */
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: #25D366;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  transition: opacity var(--ts), transform var(--t), box-shadow var(--t);
+}
+.wa-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+}
+.wa-fab:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+.wa-fab .icon { width: 28px; height: 28px; }
+
+/* Con un modal abierto sobra: es el que abre este mismo boton. */
+body.has-modal .wa-fab { display: none; }
+
+/* Con un boton de enviar en pantalla se aparta, lo marca initFabForms().
+   Con opacidad y pointer-events, no display: asi sigue siendo enfocable y
+   no se repite el problema de foco que ya costo una vez. */
+.wa-fab.is-oculto {
+  opacity: 0;
+  pointer-events: none;
+  /* visibility al final de la transicion, no al principio: mientras se
+     desvanece sigue pintandose, y recien al terminar deja de ser alcanzable
+     con el tabulador. Al quitar la clase vuelve a 'visible' de inmediato,
+     porque la regla base no declara visibility y por tanto no la retrasa. */
+  visibility: hidden;
+  transition: opacity var(--ts), visibility 0s var(--ts);
+}
+
+/* Mientras se escribe en un formulario de la pagina se quita de en medio:
+   es justo cuando el boton de enviar queda cerca del pulgar y el flotante,
+   fijo en esa esquina, le taparia el lado derecho.
+   Los formularios dentro de un modal quedan excluidos a proposito: ahi el
+   boton ya se oculta por .has-modal, y si ademas se ocultara por foco, al
+   cerrar el modal no podria recibir el foco de vuelta (un elemento con
+   display:none no es enfocable) y se quedaria escondido. */
+body:has(form :focus):not(:has(.modal :focus)) .wa-fab { display: none; }
+
 /* ── FOOTER ─────────────────────────────────────────────────── */
 .footer {
   background: var(--bg-0);
   border-top: 1px solid var(--border);
   padding: 4rem 0 2rem;
 }
+/* Despues del bloque de arriba a proposito: su 'padding' en atajo pisaria
+   un padding-bottom declarado antes. El hueco evita que el flotante se
+   pose sobre la ultima linea del footer al llegar abajo del todo. */
+.footer { padding-bottom: 6rem; }
 .footer__grid {
   display: grid;
   grid-template-columns: 1.8fr 1fr 1fr 1fr;
@@ -1161,6 +1301,15 @@ body.has-modal { overflow: hidden; }
 }
 .calc-box h3 { color: var(--text-1); margin-bottom: 0.5rem; }
 .calc-box > p { margin-bottom: 2rem; font-size: 0.95rem; }
+
+/* En movil los 2.5rem de padding se comian 80px de un contenedor de 348:
+   el formulario quedaba en 268px utiles y el campo de telefono, con el
+   combobox a ancho completo, no tenia sitio ni para "Emiratos Arabes
+   Unidos +971". */
+@media (max-width: 560px) {
+  .calc-box { padding: 1.5rem 1.25rem; }
+  .calc-box > p { margin-bottom: 1.5rem; }
+}
 
 .calc-inputs {
   display: grid;
@@ -1436,6 +1585,18 @@ body.has-modal { overflow: hidden; }
 body:has(.mobile-nav.open) .nav {
   pointer-events: none;
 }
-body:has(.mobile-nav.open) .nav__burger {
-  visibility: hidden;
+/* Abierto, la hamburguesa se queda en su sitio y se vuelve una X: el
+   control de cierre aparece justo donde el usuario acaba de tocar. La .nav
+   va en z-index 200 y el overlay en 190, asi que queda por encima. */
+body:has(.mobile-nav.open) .nav__burger span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
 }
+body:has(.mobile-nav.open) .nav__burger span:nth-child(2) {
+  opacity: 0;
+}
+body:has(.mobile-nav.open) .nav__burger span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+/* La X suelta del overlay sobra y ademas se encimaba con la hamburguesa
+   (quedaban a 8px una de otra). El markup se queda por si acaso. */
+.mobile-nav__close { display: none; }

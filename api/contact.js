@@ -435,7 +435,15 @@ export default async function handler(req, res) {
 
   const html = buildEmailHtml(flow, req.body, crm, attr);
 
-  const baseSubject = `${SUBJECT_BY_FLOW[flow]}: ${nombre} / ${empresa}`;
+  /* WhatsApp no manda empresa: componer a ciegas dejaba el asunto en
+     "... / undefined". Se arma con las partes que de verdad llegaron. */
+  const quien = [nombre, empresa]
+    .map(v => (v === undefined || v === null ? '' : String(v).trim()))
+    .filter(Boolean)
+    .join(' / ');
+  const baseSubject = quien
+    ? `${SUBJECT_BY_FLOW[flow]}: ${quien}`
+    : SUBJECT_BY_FLOW[flow];
   const subject = crm.ok ? baseSubject : `[CRM-ERROR] ${baseSubject}`;
 
   try {

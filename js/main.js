@@ -35,18 +35,47 @@
     const close  = document.querySelector('.mobile-nav__close');
     if (!burger || !menu) return;
 
+    function abierto() {
+      return menu.classList.contains('open');
+    }
+    /* El boton es el mismo para abrir y cerrar: el aria tiene que decir en
+       cual de los dos estados esta. */
+    function anunciar(estaAbierto) {
+      burger.setAttribute('aria-expanded', estaAbierto ? 'true' : 'false');
+      burger.setAttribute('aria-label', estaAbierto ? 'Cerrar menú' : 'Abrir menú');
+    }
     function open() {
       menu.classList.add('open');
       document.body.style.overflow = 'hidden';
+      anunciar(true);
     }
     function shut() {
       menu.classList.remove('open');
       document.body.style.overflow = '';
+      anunciar(false);
     }
-    burger.addEventListener('click', open);
+
+    burger.addEventListener('click', function () {
+      if (abierto()) shut();
+      else open();
+    });
     if (close) close.addEventListener('click', shut);
     menu.querySelectorAll('a').forEach(function (a) {
       a.addEventListener('click', shut);
+    });
+
+    document.addEventListener('keydown', function (e) {
+      /* defaultPrevented: si hay un modal abierto, el Escape ya es suyo. */
+      if (e.key === 'Escape' && abierto() && !e.defaultPrevented) shut();
+    });
+
+    /* El overlay cubre toda la pantalla, asi que "fuera" son dos cosas: su
+       propio fondo, y la barra del nav, que queda por encima. */
+    document.addEventListener('click', function (e) {
+      if (!abierto() || !e.target.closest) return;
+      if (e.target === menu) { shut(); return; }
+      if (e.target.closest('.mobile-nav') || e.target.closest('.nav__burger')) return;
+      shut();
     });
   }
 
@@ -526,13 +555,25 @@
       list.style.width = r.width + 'px';
       list.style.left  = r.left + 'px';
 
+      /* Con el teclado virtual abierto iOS no cambia innerHeight, solo el
+         visualViewport: sin esto la lista se abriria hacia abajo, debajo
+         del teclado, creyendo que hay sitio. */
+      var altoVentana = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+      var MARGEN = 8, SEP = 4, MAXIMO = 280;
+      var libreAbajo  = altoVentana - r.bottom - SEP - MARGEN;
+      var libreArriba = r.top - SEP - MARGEN;
+
+      /* Se elige el lado con mas sitio y la lista se limita a ese hueco. Con
+         el teclado abierto puede no caber entera en ninguno: antes se
+         clavaba en el borde de arriba y acababa tapando el propio campo. */
+      var haciaArriba = libreAbajo < MAXIMO && libreArriba > libreAbajo;
+      var libre = haciaArriba ? libreArriba : libreAbajo;
+      list.style.maxHeight = Math.max(0, Math.min(MAXIMO, libre)) + 'px';
+
       var alto = list.offsetHeight;
-      var abajo = window.innerHeight - r.bottom;
-      if (abajo < alto + 8 && r.top > abajo) {
-        list.style.top = Math.max(8, r.top - alto - 4) + 'px';
-      } else {
-        list.style.top = (r.bottom + 4) + 'px';
-      }
+      list.style.top = haciaArriba
+        ? Math.max(MARGEN, r.top - alto - SEP) + 'px'
+        : (r.bottom + SEP) + 'px';
     }
 
     /* Mientras esta abierta hay que seguir al campo: el cuerpo del modal
@@ -586,6 +627,10 @@
       /* true: el scroll del cuerpo del modal no burbujea hasta window. */
       window.addEventListener('scroll', reposicionar, true);
       window.addEventListener('resize', reposicionar);
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', reposicionar);
+        window.visualViewport.addEventListener('scroll', reposicionar);
+      }
       pintar();
       var idx = -1;
       visibles.forEach(function (p, i) { if (p.iso === seleccionado.iso) idx = i; });
@@ -598,6 +643,10 @@
       abierto = false;
       window.removeEventListener('scroll', reposicionar, true);
       window.removeEventListener('resize', reposicionar);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', reposicionar);
+        window.visualViewport.removeEventListener('scroll', reposicionar);
+      }
       list.hidden = true;
       input.setAttribute('aria-expanded', 'false');
       input.removeAttribute('aria-activedescendant');
@@ -736,6 +785,11 @@
           return;
         }
 
+        /* Un boton deshabilitado no frena el submit por Enter desde un
+           campo de texto: sin esta guarda, ahi se cuela el segundo envio. */
+        var enCurso = gateForm.querySelector('[type="submit"]');
+        if (enCurso && enCurso.disabled) return;
+
         /* Required fields */
         var gErrors = [];
         var nombre   = val('g-nombre').trim();
@@ -825,7 +879,9 @@
     /* Formal quote button */
     if (formalBtn) {
       formalBtn.addEventListener('click', function () {
-        if (!lastCalc) return;
+        /* Misma guarda que los otros tres: sin ella una segunda entrada
+           captura "Enviando..." como texto original y lo deja puesto. */
+        if (!lastCalc || formalBtn.disabled) return;
         var originalText = formalBtn.innerHTML;
         formalBtn.disabled = true;
         formalBtn.textContent = 'Enviando...';
@@ -1046,6 +1102,11 @@
         return;
       }
 
+      /* Ver la nota del gate: el Enter en un campo de texto vuelve a
+         enviar aunque el boton este deshabilitado. */
+      var enCurso = form.querySelector('[type="submit"]');
+      if (enCurso && enCurso.disabled) return;
+
       /* Required fields */
       var gv = function (id) {
         var el = document.getElementById(id);
@@ -1207,6 +1268,9 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
 
+      var enCurso = form.querySelector('[type="submit"]');
+      if (enCurso && enCurso.disabled) return;
+
       var gv = function (id) {
         var el = document.getElementById(id);
         return el ? el.value.trim() : '';
@@ -1294,6 +1358,45 @@
           mostrarPaso2(enlace);
         });
     });
+  }
+
+  /* ── FLOTANTE VS BOTONES DE ENVIAR ─────────────────────────── */
+  /* Con solo hacer scroll, el flotante puede pasar por encima de una accion
+     principal: la regla de :focus no cubre a quien nunca toca un campo.
+     Aqui se aparta mientras alguna este en pantalla.
+     Se declaran en el HTML con data-cta-principal, en vez de listarlas aqui,
+     para que una accion nueva quede cubierta con solo marcarla. */
+  function initFabForms() {
+    var fab = document.querySelector('.wa-fab');
+    if (!fab || !window.IntersectionObserver) return;
+
+    /* Lo que este dentro de un modal queda fuera aunque lleve la marca: ahi
+       el flotante ya se oculta por .has-modal, y ademas al abrirse el modal
+       su boton entraria en pantalla y dejaria el flotante marcado justo
+       cuando tiene que recibir el foco de vuelta al cerrarse. */
+    var botones = Array.prototype.filter.call(
+      document.querySelectorAll('[data-cta-principal]'),
+      function (b) { return !(b.closest && b.closest('.modal')); }
+    );
+    if (!botones.length) return;
+
+    var visibles = new Set();
+
+    var observador = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) {
+        if (e.isIntersecting) visibles.add(e.target);
+        else visibles.delete(e.target);
+      });
+      fab.classList.toggle('is-oculto', visibles.size > 0);
+    }, {
+      /* Colchon de 120px: el cambio ocurre antes de que lleguen a tocarse,
+         no en el borde exacto, que es donde un scroll fino lo haria
+         parpadear entrando y saliendo. */
+      rootMargin: '120px 0px 120px 0px',
+      threshold: 0
+    });
+
+    botones.forEach(function (b) { observador.observe(b); });
   }
 
   /* ── ACTIVE NAV LINK ───────────────────────────────────────── */
@@ -1536,6 +1639,7 @@
     initGallery();
     initActiveLink();
     initAdsNav();
+    initFabForms();
   });
 
 })();
