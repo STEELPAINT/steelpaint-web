@@ -1251,6 +1251,28 @@
     return 'https://wa.me/' + WA_NUMERO + '?text=' + encodeURIComponent(texto);
   }
 
+  /* Nunca lanza: si el registro no sale, la conversacion de WhatsApp ya
+     esta abierta y eso es lo que no se puede perder. */
+  function waEnviarRegistro(cuerpo) {
+    try {
+      if (navigator.sendBeacon) {
+        var blob = new Blob([cuerpo], { type: 'application/json' });
+        /* Devuelve false si el navegador no acepta encolarlo; ahi se
+           reintenta con fetch en vez de darlo por enviado. */
+        if (navigator.sendBeacon('/api/contact', blob)) return;
+      }
+    } catch (err) { /* se intenta con fetch */ }
+
+    try {
+      fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: cuerpo,
+        keepalive: true
+      }).catch(function () { /* no-op: no hay a quien avisar */ });
+    } catch (err) { /* no-op */ }
+  }
+
   function initWhatsappForm() {
     var form = document.getElementById('whatsapp-form');
     if (!form) return;
@@ -1279,6 +1301,10 @@
       if (paso1) paso1.hidden = false;
       if (paso2) paso2.hidden = true;
       if (errEl) errEl.style.display = 'none';
+      /* El boton se deshabilita al enviar y ya no hay respuesta que lo
+         devuelva: se rehabilita al volver a abrir el modal. */
+      var btn = form.querySelector('[type="submit"]');
+      if (btn) btn.disabled = false;
     }
 
     document.addEventListener('click', function (e) {
@@ -1311,72 +1337,49 @@
       }
       if (errEl) errEl.style.display = 'none';
 
+      /* La misma referencia viaja al mensaje y al registro. */
       var referencia = waReferencia();
       var enlace     = waEnlace(nombre, referencia);
 
-      /* La pestaña se reserva aqui, dentro del gesto del usuario: abrirla
-         despues de la respuesta del backend la convierte en un popup y el
-         navegador la bloquea. Se navega cuando toca. */
-      var pestana = null;
-      try { pestana = window.open('', '_blank'); } catch (err) { pestana = null; }
-
-      function abrirWhatsapp() {
-        if (pestana && !pestana.closed) {
-          try {
-            /* Todavia es about:blank y del mismo origen: se le corta el
-               acceso a esta ventana antes de mandarla a un sitio ajeno. */
-            pestana.opener = null;
-            pestana.location.href = enlace;
-            return;
-          } catch (err) { /* se cayo el handle: se intenta de nuevo abajo */ }
-        }
-        try { window.open(enlace, '_blank', 'noopener'); } catch (err) { /* no-op */ }
-      }
-
-      var hp  = document.getElementById('w-sp-website');
+      var hp = document.getElementById('w-sp-website');
       /* Se lee recortado, igual que lo evalua el backend. */
       var honeypot = hp ? hp.value.trim() : '';
 
       var btn = form.querySelector('[type="submit"]');
-      var textoOriginal = btn.innerHTML;
-      btn.textContent = 'Generando...';
-      btn.disabled    = true;
+      btn.disabled = true;
 
-      fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          flow:        'whatsapp',
-          nombre:      nombre,
-          telefono:    composeTel('w-telefono'),
-          referencia:  referencia,
-          attribution: window.SP_getAttribution
-            ? window.SP_getAttribution()
-            : { first: null, last: null },
-          sp_website:  hp ? hp.value : ''
-        })
-      })
-        .then(function (res) {
-          if (!res.ok) throw new Error('Request failed');
-          /* El backend descarta al bot en silencio y contesta 200, asi que
-             un honeypot lleno llega hasta aqui indistinguible de un envio
-             bueno. Sin esta guarda, la conversion en Ads contaria bots. */
-          if (honeypot) return;
-          /* Solo con el registro confirmado: el evento debe contar
-             preregistros guardados, no intentos. */
-          window.dataLayer = window.dataLayer || [];
-          dataLayer.push({ event: 'whatsapp_preregistro' });
-        })
-        .catch(function () {
-          /* Sin evento, pero la conversacion sigue: perder el registro es
-             mejor que perder el lead. */
-        })
-        .then(function () {
-          btn.innerHTML = textoOriginal;
-          btn.disabled  = false;
-          abrirWhatsapp();
-          mostrarPaso2(enlace);
-        });
+      /* WhatsApp se abre aqui mismo, dentro del gesto: es lo que el usuario
+         pidio y no hay nada que esperar para armar el enlace. Antes se
+         reservaba una pestaña en blanco para sortear el bloqueo de popups
+         mientras llegaba la respuesta del backend, y esa pestaña se quedaba
+         vacia unos segundos a la vista. */
+      try { window.open(enlace, '_blank', 'noopener'); } catch (err) { /* no-op */ }
+
+      /* El registro sale sin esperarlo. sendBeacon esta pensado justo para
+         esto: la peticion la asume el navegador y sobrevive aunque la
+         pestaña pase a segundo plano o se cierre. keepalive hace lo mismo
+         con fetch donde sendBeacon no exista o rechace el envio. */
+      var registro = JSON.stringify({
+        flow:        'whatsapp',
+        nombre:      nombre,
+        telefono:    composeTel('w-telefono'),
+        referencia:  referencia,
+        attribution: window.SP_getAttribution
+          ? window.SP_getAttribution()
+          : { first: null, last: null },
+        sp_website:  hp ? hp.value : ''
+      });
+      waEnviarRegistro(registro);
+
+      /* Ya no hay confirmacion que esperar, asi que el evento se dispara al
+         enviar. La guarda del honeypot se queda: el backend descarta al bot
+         en silencio y sin ella la conversion en Ads contaria bots. */
+      if (!honeypot) {
+        window.dataLayer = window.dataLayer || [];
+        dataLayer.push({ event: 'whatsapp_preregistro' });
+      }
+
+      mostrarPaso2(enlace);
     });
   }
 

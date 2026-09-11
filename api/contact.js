@@ -407,6 +407,85 @@ async function sendToCrm(flow, payload) {
   }
 }
 
+/* Destinatarios del correo del lead. */
+const CORREO_LEADS = [
+  'hola@scndal.com',
+  'marcelo.steelpaint@gmail.com',
+  'marcelo@steel-paint.com.mx',
+  'andrea.r@scndal.com',
+  'michel.l@scndal.com'
+];
+
+/* La alerta de CRM caido va solo a quienes pueden repararlo: al cliente no
+   le sirve un aviso tecnico que no puede accionar. */
+const CORREO_ALERTAS = ['hola@scndal.com', 'andrea.r@scndal.com'];
+
+/* Aislado como sendToCrm: nunca lanza, devuelve { ok, reason }. */
+async function enviarCorreo(destinatarios, subject, html) {
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'Steel Paint <contacto@mail.steel-paint.com.mx>',
+        to: destinatarios,
+        subject: subject,
+        html: html
+      })
+    });
+    if (!response.ok) return { ok: false, reason: `HTTP ${response.status}` };
+    return { ok: true, reason: null };
+  } catch (err) {
+    return { ok: false, reason: `error de red: ${err && err.message ? err.message : 'desconocido'}` };
+  }
+}
+
+/* El lead se manda tal como se le habria mandado al CRM, para poder darlo
+   de alta a mano campo por campo sin tener que reconstruirlo. */
+function buildAlertaCrmHtml(flow, payload, razon) {
+  let filas = '';
+  Object.keys(payload).forEach(function (k) {
+    filas += mailFila(k, escapeHtml(payload[k]));
+  });
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lead no entró a la plataforma</title>
+</head>
+<body style="margin:0;padding:0;background:#F3F4F6;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F3F4F6;padding:24px 0;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#FFFFFF;border:1px solid ${MAIL_BORDE};">
+        <tr>
+          <td style="background:#B91C1C;padding:24px;">
+            <div style="font-family:${MAIL_FUENTE};font-size:22px;line-height:1.2;font-weight:bold;color:#FFFFFF;">Lead no entró a la plataforma</div>
+            <div style="font-family:${MAIL_FUENTE};font-size:14px;line-height:1.4;color:#FEE2E2;padding-top:4px;">El correo del lead sí salió; lo que falló fue el alta en el CRM.</div>
+          </td>
+        </tr>${mailSeccion(
+          mailTitulo('Qué pasó') +
+          mailFila('Motivo', escapeHtml(razon)) +
+          mailFila('Flujo', escapeHtml(flow)),
+        '#FEF2F2')}${mailSeccion(mailTitulo('Datos para darlo de alta a mano') + filas)}
+        <tr>
+          <td style="padding:18px 24px;border-top:1px solid ${MAIL_BORDE};font-family:${MAIL_FUENTE};font-size:12px;line-height:1.5;color:${MAIL_GRIS};">
+            Enviado desde steel-paint.com.mx
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>`;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -422,18 +501,11 @@ export default async function handler(req, res) {
   }
 
   const { nombre, empresa } = req.body;
-
   const flow = resolveFlow(req.body);
 
-  /* El CRM va antes del correo porque el asunto necesita saber si el
-     lead entro. Esta aislado en sendToCrm(), asi que el correo sale
-     igual pase lo que pase aqui. */
   /* Una sola vez por peticion: lo consumen el payload del CRM y el correo. */
   const attr = buildAttributionSummary(req.body.attribution);
-
-  const crm = await sendToCrm(flow, buildCrmPayload(flow, req.body, attr));
-
-  const html = buildEmailHtml(flow, req.body, crm, attr);
+  const payloadCrm = buildCrmPayload(flow, req.body, attr);
 
   /* WhatsApp no manda empresa: componer a ciegas dejaba el asunto en
      "... / undefined". Se arma con las partes que de verdad llegaron. */
@@ -441,32 +513,44 @@ export default async function handler(req, res) {
     .map(v => (v === undefined || v === null ? '' : String(v).trim()))
     .filter(Boolean)
     .join(' / ');
-  const baseSubject = quien
+  const subject = quien
     ? `${SUBJECT_BY_FLOW[flow]}: ${quien}`
     : SUBJECT_BY_FLOW[flow];
-  const subject = crm.ok ? baseSubject : `[CRM-ERROR] ${baseSubject}`;
 
-  try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from: 'Steel Paint <contacto@mail.steel-paint.com.mx>',
-        to: ['hola@scndal.com', 'marcelo.steelpaint@gmail.com', 'marcelo@steel-paint.com.mx', 'andrea.r@scndal.com', 'michel.l@scndal.com'],
-        subject: subject,
-        html: html
-      })
-    });
+  /* El correo ya no espera al CRM: en frio ese arranque costaba varios
+     segundos de espera visible. Como no puede saber el resultado, no lleva
+     marca de CRM; de eso se encarga el correo de alerta de mas abajo. */
+  const crmSinDeterminar = { ok: true, reason: null };
+  const html = buildEmailHtml(flow, req.body, crmSinDeterminar, attr);
 
-    if (response.ok) {
-      return res.status(200).json({ success: true });
-    } else {
-      return res.status(500).json({ error: 'Error enviando email' });
+  /* Los dos arrancan aqui, antes de esperar a ninguno. */
+  const tareaCrm = sendToCrm(flow, payloadCrm);
+  const tareaCorreo = enviarCorreo(CORREO_LEADS, subject, html);
+
+  const correo = await tareaCorreo;
+  if (correo.ok) {
+    res.status(200).json({ success: true });
+  } else {
+    console.error(`[contact] correo fallo (${flow}): ${correo.reason}`);
+    res.status(500).json({ error: 'Error enviando email' });
+  }
+
+  /* La respuesta ya viajo al navegador, pero la funcion sigue viva hasta que
+     esto termine: si se retornara aqui, el runtime podria congelar la
+     instancia y matar la peticion al CRM a medio vuelo. */
+  const [resultadoCrm] = await Promise.allSettled([tareaCrm]);
+  const crm = resultadoCrm.status === 'fulfilled'
+    ? resultadoCrm.value
+    : { ok: false, reason: 'excepcion inesperada en sendToCrm' };
+
+  if (!crm.ok) {
+    const alerta = await enviarCorreo(
+      CORREO_ALERTAS,
+      `[CRM-ERROR] Lead no entró a la plataforma: ${nombre || 'sin nombre'}`,
+      buildAlertaCrmHtml(flow, payloadCrm, crm.reason)
+    );
+    if (!alerta.ok) {
+      console.error(`[contact] tampoco salio la alerta de CRM (${flow}): ${alerta.reason}`);
     }
-  } catch (err) {
-    return res.status(500).json({ error: 'Error enviando email' });
   }
 }
