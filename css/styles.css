@@ -1141,7 +1141,7 @@ body.has-modal { overflow: hidden; }
   color: #fff;
   cursor: pointer;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-  transition: opacity var(--ts), transform var(--t), box-shadow var(--t);
+  transition: transform var(--t), box-shadow var(--t);
 }
 .wa-fab:hover {
   transform: translateY(-2px);
@@ -1155,29 +1155,6 @@ body.has-modal { overflow: hidden; }
 
 /* Con un modal abierto sobra: es el que abre este mismo boton. */
 body.has-modal .wa-fab { display: none; }
-
-/* Con un boton de enviar en pantalla se aparta, lo marca initFabForms().
-   Con opacidad y pointer-events, no display: asi sigue siendo enfocable y
-   no se repite el problema de foco que ya costo una vez. */
-.wa-fab.is-oculto {
-  opacity: 0;
-  pointer-events: none;
-  /* visibility al final de la transicion, no al principio: mientras se
-     desvanece sigue pintandose, y recien al terminar deja de ser alcanzable
-     con el tabulador. Al quitar la clase vuelve a 'visible' de inmediato,
-     porque la regla base no declara visibility y por tanto no la retrasa. */
-  visibility: hidden;
-  transition: opacity var(--ts), visibility 0s var(--ts);
-}
-
-/* Mientras se escribe en un formulario de la pagina se quita de en medio:
-   es justo cuando el boton de enviar queda cerca del pulgar y el flotante,
-   fijo en esa esquina, le taparia el lado derecho.
-   Los formularios dentro de un modal quedan excluidos a proposito: ahi el
-   boton ya se oculta por .has-modal, y si ademas se ocultara por foco, al
-   cerrar el modal no podria recibir el foco de vuelta (un elemento con
-   display:none no es enfocable) y se quedaria escondido. */
-body:has(form :focus):not(:has(.modal :focus)) .wa-fab { display: none; }
 
 /* ── FOOTER ─────────────────────────────────────────────────── */
 .footer {
@@ -1331,7 +1308,13 @@ body:has(form :focus):not(:has(.modal :focus)) .wa-fab { display: none; }
    combobox a ancho completo, no tenia sitio ni para "Emiratos Arabes
    Unidos +971". */
 @media (max-width: 560px) {
-  .calc-box { padding: 1.5rem 1.25rem; }
+  /* El padding inferior es mayor que el resto a proposito: el flotante ocupa
+     una banda de 76px en la esquina (56 de boton + 20 de margen), y sin este
+     hueco el boton de enviar caia justo ahi al bajar hasta el final del
+     formulario. Con el, al apoyar el fondo de la caja en el borde inferior
+     el boton ya queda por encima de la banda. Se resuelve por geometria y no
+     escondiendo el flotante. */
+  .calc-box { padding: 1.5rem 1.25rem 6rem; }
   .calc-box > p { margin-bottom: 1.5rem; }
 }
 

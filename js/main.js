@@ -1380,45 +1380,6 @@
     });
   }
 
-  /* ── FLOTANTE VS BOTONES DE ENVIAR ─────────────────────────── */
-  /* Con solo hacer scroll, el flotante puede pasar por encima de una accion
-     principal: la regla de :focus no cubre a quien nunca toca un campo.
-     Aqui se aparta mientras alguna este en pantalla.
-     Se declaran en el HTML con data-cta-principal, en vez de listarlas aqui,
-     para que una accion nueva quede cubierta con solo marcarla. */
-  function initFabForms() {
-    var fab = document.querySelector('.wa-fab');
-    if (!fab || !window.IntersectionObserver) return;
-
-    /* Lo que este dentro de un modal queda fuera aunque lleve la marca: ahi
-       el flotante ya se oculta por .has-modal, y ademas al abrirse el modal
-       su boton entraria en pantalla y dejaria el flotante marcado justo
-       cuando tiene que recibir el foco de vuelta al cerrarse. */
-    var botones = Array.prototype.filter.call(
-      document.querySelectorAll('[data-cta-principal]'),
-      function (b) { return !(b.closest && b.closest('.modal')); }
-    );
-    if (!botones.length) return;
-
-    var visibles = new Set();
-
-    var observador = new IntersectionObserver(function (entradas) {
-      entradas.forEach(function (e) {
-        if (e.isIntersecting) visibles.add(e.target);
-        else visibles.delete(e.target);
-      });
-      fab.classList.toggle('is-oculto', visibles.size > 0);
-    }, {
-      /* Colchon de 120px: el cambio ocurre antes de que lleguen a tocarse,
-         no en el borde exacto, que es donde un scroll fino lo haria
-         parpadear entrando y saliendo. */
-      rootMargin: '120px 0px 120px 0px',
-      threshold: 0
-    });
-
-    botones.forEach(function (b) { observador.observe(b); });
-  }
-
   /* ── ACTIVE NAV LINK ───────────────────────────────────────── */
   function initActiveLink() {
     var page = window.location.pathname.split('/').pop() || 'index.html';
@@ -1659,7 +1620,6 @@
     initGallery();
     initActiveLink();
     initAdsNav();
-    initFabForms();
   });
 
 })();
