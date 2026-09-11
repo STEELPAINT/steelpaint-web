@@ -878,14 +878,13 @@ p  { color: var(--text-2); line-height: 1.75; }
   min-width: 0;
 }
 
-/* La lista flota sobre el formulario: si empujara el contenido, abrirla
-   movería el boton de enviar bajo el cursor. */
+/* Fija respecto a la ventana, no al campo: dentro del modal el cuerpo con
+   scroll recortaria una lista absoluta, y position:fixed escapa de ese
+   recorte. JS le pone top/left/width al abrirla. Flotar tambien evita que
+   abrirla empuje el boton de enviar bajo el cursor. */
 .tel-cc__list {
-  position: absolute;
-  z-index: 30;
-  top: calc(100% + 0.25rem);
-  left: 0;
-  right: 0;
+  position: fixed;
+  z-index: 300;
   max-height: 280px;
   overflow-y: auto;
   margin: 0;
@@ -924,6 +923,100 @@ p  { color: var(--text-2); line-height: 1.75; }
 @media (max-width: 420px) {
   .tel-cc { flex: 1 1 100%; width: 100%; }
   .form-group .tel-field__num { flex: 1 1 100%; }
+}
+
+/* ── TARJETA DE CTA DE CONTACTO ─────────────────────────────── */
+.cta-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem 2.5rem;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  padding: 2.5rem;
+  margin-bottom: 3rem;
+}
+.cta-card__body { flex: 1 1 320px; }
+.cta-card__title { color: var(--text-1); margin-bottom: 0.6rem; }
+.cta-card__text { color: var(--text-2); max-width: 56ch; }
+.cta-card__btn { flex: 0 0 auto; }
+.cdet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem 2.5rem;
+}
+.cdet-grid .cdet { margin-bottom: 0; }
+
+/* ── MODAL ──────────────────────────────────────────────────── */
+/* Sin transform en el dialogo: un ancestro transformado se vuelve el
+   bloque contenedor de position:fixed y recortaria la lista de paises. */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.72);
+}
+.modal[hidden] { display: none; }
+.modal__dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 720px;
+  max-height: calc(100vh - 3rem);
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  overflow: hidden;
+}
+.modal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.75rem 1.75rem 1rem;
+}
+.modal__title { color: var(--text-1); font-size: 1.35rem; margin: 0; }
+.modal__close {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: color var(--t), border-color var(--t);
+}
+.modal__close:hover { color: var(--text-1); border-color: var(--text-3); }
+.modal__close .icon { width: 14px; height: 14px; }
+.modal__body {
+  padding: 0 1.75rem 1.75rem;
+  overflow-y: auto;
+}
+/* El scroll del fondo se bloquea aqui; el padding lo compensa JS para que
+   la pagina no brinque al desaparecer la barra. */
+body.has-modal { overflow: hidden; }
+
+@media (max-width: 640px) {
+  .modal { padding: 0; }
+  .modal__dialog {
+    max-width: none;
+    height: 100%;
+    max-height: 100%;
+    border: 0;
+    border-radius: 0;
+  }
+  .cta-card { padding: 1.75rem; }
+  .cta-card__btn { width: 100%; justify-content: center; }
 }
 
 /* ── FOOTER ─────────────────────────────────────────────────── */

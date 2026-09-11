@@ -20,6 +20,59 @@
   <link rel="preconnect" href="https://www.clarity.ms" crossorigin>
   <link rel="preload" href="assets/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/sora-var.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- Variante de campaña (#ads). Inline y antes del CSS a proposito: si la
+       clase se aplicara en DOMContentLoaded, el usuario alcanzaria a ver la
+       version completa y el cambio se notaria como un parpadeo. -->
+  <script>
+    (function () {
+      var CLAVE = 'sp_v_ads';
+      var h = (window.location.hash || '')
+        .replace(/^#/, '')
+        .replace(/^\//, '')
+        .replace(/\/$/, '')
+        .toLowerCase();
+      var activa = h === 'ads';
+
+      if (activa) {
+        /* En sesion, no local: la variante debe morir al cerrar la pestaña.
+           Si el almacenamiento lanza (modo privado) la clase se aplica
+           igual, porque el hash ya la declaro. */
+        try { sessionStorage.setItem(CLAVE, '1'); } catch (e) { /* no-op */ }
+      } else {
+        /* Sin hash: la marca es la unica pista. Navegar por el nav o
+           recargar deja la URL sin #ads y aqui es donde se recupera. */
+        try { activa = sessionStorage.getItem(CLAVE) === '1'; } catch (e) { activa = false; }
+      }
+
+      if (activa) document.documentElement.classList.add('v-ads');
+    })();
+  </script>
+  <style>
+    /* El markup de la variante vive siempre en la pagina; aqui solo cambia
+       lo que se muestra. Ninguna seccion de contenido se oculta: solo el CTA
+       del hero y los dos enlaces del nav que salen del documento. */
+    /* Doble clase a proposito: styles.css carga despues y una regla suya de
+       una sola clase (.btn, .nav__links) le ganaria a la nuestra por venir
+       mas tarde con la misma especificidad. Asi el resultado no depende del
+       orden de carga. Los selectores con id ya van por encima de todas. */
+    .btn.hero__cta-ads { display: none; }
+    .v-ads .btn.hero__cta-calc { display: none; }
+    .v-ads .btn.hero__cta-ads { display: inline-flex; }
+
+    /* Nav: dos juegos completos de enlaces, uno por version. El texto y el
+       href cambian, y eso el CSS no lo puede hacer sobre un solo juego. */
+    .nav__links.nav__links--ads { display: none; }
+    .v-ads .nav__links.nav__links--normal { display: none; }
+    .v-ads .nav__links.nav__links--ads { display: flex; }
+    .mobile-nav a.nav__item--ads { display: none; }
+    .v-ads .mobile-nav a.nav__item--normal { display: none; }
+    .v-ads .mobile-nav a.nav__item--ads { display: block; }
+
+    /* Secciones que la variante no muestra. Siguen en el markup: en la
+       version normal se ven tal cual. */
+    .v-ads #cta-calculadora,
+    .v-ads #por-que { display: none; }
+  </style>
   <link rel="stylesheet" href="css/styles.css">
   <!-- Schema -->
   <script type="application/ld+json">
@@ -150,17 +203,23 @@
 <nav class="nav" role="navigation" aria-label="Navegación principal">
   <div class="wrap">
     <div class="nav__inner">
-      <a href="index.html" aria-label="Steel Paint — Inicio">
+      <a href="index.html" class="nav__brand" aria-label="Steel Paint — Inicio">
         <img src="assets/logo-white.svg" alt="Steel Paint" class="nav__logo" fetchpriority="high">
       </a>
-      <ul class="nav__links">
+      <ul class="nav__links nav__links--normal">
         <li><a href="index.html">Inicio</a></li>
         <li><a href="index.html#proceso">¿Qué hacemos?</a></li>
         <li><a href="index.html#industrias">Industrias</a></li>
         <li><a href="nosotros.html">Nosotros</a></li>
         <li><a href="recursos.html">Recursos</a></li>
       </ul>
-      <a href="index.html#contacto" class="btn btn-primary nav__cta">Contáctanos</a>
+      <ul class="nav__links nav__links--ads">
+        <li><a href="#proceso">¿Qué hacemos?</a></li>
+        <li><a href="#capacidades">Capacidades</a></li>
+        <li><a href="#industrias">Industrias</a></li>
+        <li><a href="#galeria">Galería</a></li>
+      </ul>
+      <a href="index.html#contacto" class="btn btn-primary nav__cta" data-open-modal="contact-modal">Contáctanos</a>
       <button class="nav__burger" aria-label="Abrir menú" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -171,19 +230,23 @@
 <!-- Mobile Nav -->
 <div class="mobile-nav" role="dialog" aria-modal="true" aria-label="Menú móvil">
   <span class="mobile-nav__close" aria-label="Cerrar menú"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg></span>
-  <a href="index.html">Inicio</a>
-  <a href="index.html#proceso">¿Qué hacemos?</a>
-  <a href="index.html#industrias">Industrias</a>
-  <a href="nosotros.html">Nosotros</a>
-  <a href="recursos.html">Recursos</a>
-  <a href="index.html#contacto" class="btn btn-primary btn-lg">Contáctanos</a>
+  <a href="index.html" class="nav__item--normal">Inicio</a>
+  <a href="index.html#proceso" class="nav__item--normal">¿Qué hacemos?</a>
+  <a href="index.html#industrias" class="nav__item--normal">Industrias</a>
+  <a href="nosotros.html" class="nav__item--normal">Nosotros</a>
+  <a href="recursos.html" class="nav__item--normal">Recursos</a>
+  <a href="#proceso" class="nav__item--ads">¿Qué hacemos?</a>
+  <a href="#capacidades" class="nav__item--ads">Capacidades</a>
+  <a href="#industrias" class="nav__item--ads">Industrias</a>
+  <a href="#galeria" class="nav__item--ads">Galería</a>
+  <a href="index.html#contacto" class="btn btn-primary btn-lg" data-open-modal="contact-modal">Contáctanos</a>
 </div>
 
 
 <!-- ═══════════════════════════════════════════════
      HERO
 ════════════════════════════════════════════════ -->
-<section class="hero" aria-label="Bienvenida">
+<section class="hero" id="inicio" aria-label="Bienvenida">
   <video autoplay muted loop playsinline preload="metadata" aria-hidden="true"
          style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.3;pointer-events:none;">
     <source src="assets/video-steelpaint.webm" type="video/webm">
@@ -210,9 +273,13 @@
         garantizados y entregas desde 24 horas.
       </p>
       <div class="hero__actions hero-in">
-        <a href="calculadora.html" class="btn btn-primary btn-lg">
+        <a href="calculadora.html" class="btn btn-primary btn-lg hero__cta-calc">
           <svg class="icon" viewBox="0 0 384 512" aria-hidden="true"><path d="M64 0C28.7 0 0 28.7 0 64V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H64zM96 64H288c17.7 0 32 14.3 32 32v32c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V96c0-17.7 14.3-32 32-32zm32 160a32 32 0 1 1 -64 0 32 32 0 1 1 64 0zM96 352a32 32 0 1 1 0-64 32 32 0 1 1 0 64zM64 416c0-17.7 14.3-32 32-32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H96c-17.7 0-32-14.3-32-32zM192 256a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm32 64a32 32 0 1 1 -64 0 32 32 0 1 1 64 0zm64-64a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm32 64a32 32 0 1 1 -64 0 32 32 0 1 1 64 0zM288 448a32 32 0 1 1 0-64 32 32 0 1 1 0 64z"/></svg> Calcular cotización
         </a>
+        <button type="button" class="btn btn-primary btn-lg hero__cta-ads" data-open-modal="contact-modal">
+          <svg class="icon" viewBox="0 0 512 512" aria-hidden="true"><path d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480V396.4c0-4 1.5-7.8 4.2-10.7L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"/></svg>
+          Solicita una Cotización
+        </button>
         <a href="#proceso" class="btn btn-ghost btn-lg">
           Ver nuestro proceso <svg class="icon" viewBox="0 0 384 512" aria-hidden="true"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"/></svg>
         </a>
@@ -315,7 +382,7 @@
 <!-- ═══════════════════════════════════════════════
      CAPACIDADES TÉCNICAS
 ════════════════════════════════════════════════ -->
-<section class="section section--card" aria-labelledby="cap-title">
+<section class="section section--card" id="capacidades" aria-labelledby="cap-title">
   <div class="wrap">
     <div class="sh center">
       <span class="label">Infraestructura</span>
@@ -484,7 +551,7 @@
 <!-- ═══════════════════════════════════════════════
      POR QUÉ NOSOTROS
 ════════════════════════════════════════════════ -->
-<section class="section section--card" aria-labelledby="why-title">
+<section class="section section--card" id="por-que" aria-labelledby="why-title">
   <div class="wrap">
     <div class="sh center">
       <span class="label">Por qué Steel Paint</span>
@@ -530,7 +597,7 @@
 <!-- ═══════════════════════════════════════════════
      CTA CALCULADORA
 ════════════════════════════════════════════════ -->
-<div class="cta-band">
+<div class="cta-band" id="cta-calculadora">
   <div class="wrap">
     <span class="label">Calculadora de cotización</span>
     <h2>¿Cuánto costaría pintar tus piezas?</h2>
@@ -556,10 +623,18 @@
       <span class="label">Contacto</span>
       <h2 id="contact-title">¿Tienes un proyecto en puerta?</h2>
     </div>
-    <div class="contact__layout">
-      <div class="contact-info">
-        <h3 class="contact-info__head">Cuéntanos los detalles</h3>
-        <p>Envíanos las medidas de tu pieza, material, color y volumen. Te respondemos con un estimado en menos de 24 horas.</p>
+    <div class="cta-card reveal">
+      <div class="cta-card__body">
+        <h3 class="cta-card__title">Cuéntanos los detalles</h3>
+        <p class="cta-card__text">Envíanos las medidas de tu pieza, material, color y volumen. Te respondemos con un estimado en menos de 24 horas.</p>
+      </div>
+      <button type="button" class="btn btn-primary btn-lg cta-card__btn" data-open-modal="contact-modal">
+        <svg class="icon" viewBox="0 0 512 512" aria-hidden="true"><path d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480V396.4c0-4 1.5-7.8 4.2-10.7L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"/></svg>
+        Escribirnos ahora
+      </button>
+    </div>
+
+    <div class="cdet-grid">
         <div class="cdet">
           <div class="cdet__icon"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true"><path d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg></div>
           <div class="cdet__body">
@@ -588,64 +663,8 @@
             <span><a href="https://wa.me/528180294154" target="_blank" style="color:var(--g-400)">Enviar mensaje directo</a></span>
           </div>
         </div>
-      </div>
-
-      <div class="form-card reveal-r">
-        <form id="contact-form" novalidate>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="c-nombre">Nombre</label>
-              <input type="text" id="c-nombre" name="nombre" placeholder="Tu nombre" required>
-            </div>
-            <div class="form-group">
-              <label for="c-empresa">Empresa</label>
-              <input type="text" id="c-empresa" name="empresa" placeholder="Nombre de tu empresa" required>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="c-telefono">Teléfono</label>
-              <div class="tel-field">
-                <div class="tel-cc">
-                  <input type="text" id="c-telefono-cc" class="tel-cc__input" role="combobox"
-                         aria-expanded="false" aria-controls="c-telefono-cc-list" aria-autocomplete="list"
-                         aria-label="Código de país" autocomplete="off" spellcheck="false" value="México +52">
-                  <ul id="c-telefono-cc-list" class="tel-cc__list" role="listbox" aria-label="Países" hidden></ul>
-                </div>
-                <input type="tel" id="c-telefono" name="telefono" class="tel-field__num" placeholder="81 0000 0000" required>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="c-email">Correo electrónico</label>
-              <input type="email" id="c-email" name="email" placeholder="correo@empresa.com" required>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="c-mensaje">Mensaje</label>
-            <textarea id="c-mensaje" name="mensaje" placeholder="Cuéntanos sobre tu proyecto: tipo de pieza, medidas aproximadas, volumen y color..."></textarea>
-          </div>
-          <label style="display:flex;align-items:flex-start;gap:0.6rem;font-size:0.82rem;color:var(--text-2);margin-bottom:1.25rem;cursor:pointer;">
-            <input type="checkbox" id="c-comms" name="comms" style="margin-top:0.25rem;flex-shrink:0;">
-            <span>Acepto recibir comunicaciones sobre los servicios de Steel Paint.</span>
-          </label>
-          <div class="hp-field" aria-hidden="true">
-            <label for="c-sp-website">No llenar este campo</label>
-            <input type="text" id="c-sp-website" name="sp_website" tabindex="-1" autocomplete="off">
-          </div>
-          <p id="contact-error" style="display:none;color:#c0392b;font-size:0.85rem;margin-bottom:1rem;"></p>
-          <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
-            <svg class="icon" viewBox="0 0 512 512" aria-hidden="true"><path d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480V396.4c0-4 1.5-7.8 4.2-10.7L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"/></svg> Enviar mensaje
-          </button>
-        </form>
-        <div class="form-success">
-          <svg class="icon" viewBox="0 0 512 512" aria-hidden="true"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"/></svg>
-          <h3>¡Mensaje recibido!</h3>
-          <p>Te respondemos en menos de 24 horas con un estimado para tu proyecto.</p>
-        </div>
-      </div>
     </div>
-  </div>
-</section>
+  </section>
 
 
 <!-- ═══════════════════════════════════════════════
@@ -698,6 +717,66 @@
     <svg class="icon" viewBox="0 0 384 512" aria-hidden="true"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>
   </button>
   <img class="lightbox__img" src="" alt="">
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     MODAL DE CONTACTO
+════════════════════════════════════════════════ -->
+<div class="modal" id="contact-modal" role="dialog" aria-modal="true" aria-labelledby="contact-modal-title" hidden>
+  <div class="modal__dialog">
+    <div class="modal__head">
+      <h2 class="modal__title" id="contact-modal-title">Cuéntanos los detalles</h2>
+      <button type="button" class="modal__close" data-close-modal aria-label="Cerrar"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg></button>
+    </div>
+    <div class="modal__body">
+      <form id="contact-form" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="c-nombre">Nombre</label>
+            <input type="text" id="c-nombre" name="nombre" placeholder="Tu nombre" required data-modal-focus>
+          </div>
+          <div class="form-group">
+            <label for="c-empresa">Empresa</label>
+            <input type="text" id="c-empresa" name="empresa" placeholder="Nombre de tu empresa" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="c-telefono">Teléfono</label>
+            <div class="tel-field">
+              <div class="tel-cc">
+                <input type="text" id="c-telefono-cc" class="tel-cc__input" role="combobox"
+                       aria-expanded="false" aria-controls="c-telefono-cc-list" aria-autocomplete="list"
+                       aria-label="Código de país" autocomplete="off" spellcheck="false" value="México +52">
+                <ul id="c-telefono-cc-list" class="tel-cc__list" role="listbox" aria-label="Países" hidden></ul>
+              </div>
+              <input type="tel" id="c-telefono" name="telefono" class="tel-field__num" placeholder="81 0000 0000" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="c-email">Correo electrónico</label>
+            <input type="email" id="c-email" name="email" placeholder="correo@empresa.com" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="c-mensaje">Mensaje</label>
+          <textarea id="c-mensaje" name="mensaje" placeholder="Cuéntanos sobre tu proyecto: tipo de pieza, medidas aproximadas, volumen y color..."></textarea>
+        </div>
+        <label style="display:flex;align-items:flex-start;gap:0.6rem;font-size:0.82rem;color:var(--text-2);margin-bottom:1.25rem;cursor:pointer;">
+          <input type="checkbox" id="c-comms" name="comms" style="margin-top:0.25rem;flex-shrink:0;">
+          <span>Acepto recibir comunicaciones sobre los servicios de Steel Paint.</span>
+        </label>
+        <div class="hp-field" aria-hidden="true">
+          <label for="c-sp-website">No llenar este campo</label>
+          <input type="text" id="c-sp-website" name="sp_website" tabindex="-1" autocomplete="off">
+        </div>
+        <p id="contact-error" style="display:none;color:#c0392b;font-size:0.85rem;margin-bottom:1rem;"></p>
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
+          <svg class="icon" viewBox="0 0 512 512" aria-hidden="true"><path d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480V396.4c0-4 1.5-7.8 4.2-10.7L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"/></svg> Enviar mensaje
+        </button>
+      </form>
+    </div>
+  </div>
 </div>
 
 <script src="js/main.js"></script>

@@ -518,6 +518,29 @@
       input.dataset.iso    = pais.iso;
     }
 
+    /* La lista es position:fixed, asi que sus coordenadas se calculan
+       contra la ventana. Se voltea hacia arriba si abajo no cabe: dentro
+       del modal el campo puede quedar pegado al borde inferior. */
+    function posicionar() {
+      var r = input.getBoundingClientRect();
+      list.style.width = r.width + 'px';
+      list.style.left  = r.left + 'px';
+
+      var alto = list.offsetHeight;
+      var abajo = window.innerHeight - r.bottom;
+      if (abajo < alto + 8 && r.top > abajo) {
+        list.style.top = Math.max(8, r.top - alto - 4) + 'px';
+      } else {
+        list.style.top = (r.bottom + 4) + 'px';
+      }
+    }
+
+    /* Mientras esta abierta hay que seguir al campo: el cuerpo del modal
+       y la pagina pueden desplazarse debajo. */
+    function reposicionar() {
+      if (abierto) posicionar();
+    }
+
     function pintar() {
       var html = '';
       visibles.forEach(function (pais, i) {
@@ -528,6 +551,7 @@
                 '<span class="tel-cc__codigo">+' + pais.codigo + '</span></li>';
       });
       list.innerHTML = html || '<li class="tel-cc__vacio" role="presentation">Sin resultados</li>';
+      if (abierto) posicionar();
       marcar(visibles.length ? 0 : -1);
     }
 
@@ -559,6 +583,9 @@
          la lista no alcanzaria a bajar hasta la opcion seleccionada. */
       list.hidden = false;
       input.setAttribute('aria-expanded', 'true');
+      /* true: el scroll del cuerpo del modal no burbujea hasta window. */
+      window.addEventListener('scroll', reposicionar, true);
+      window.addEventListener('resize', reposicionar);
       pintar();
       var idx = -1;
       visibles.forEach(function (p, i) { if (p.iso === seleccionado.iso) idx = i; });
@@ -569,6 +596,8 @@
        se queda vacio ni con texto a medio escribir. */
     function cerrar() {
       abierto = false;
+      window.removeEventListener('scroll', reposicionar, true);
+      window.removeEventListener('resize', reposicionar);
       list.hidden = true;
       input.setAttribute('aria-expanded', 'false');
       input.removeAttribute('aria-activedescendant');
@@ -891,6 +920,118 @@
     }
   }
 
+  /* ── MODALES ───────────────────────────────────────────────── */
+  var modalAbierto = null;
+  var modalOrigen  = null;
+
+  var MODAL_FOCO = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  /* Solo lo que se puede ver y enfocar. El honeypot esta fuera de pantalla
+     pero mide, asi que se descarta por su tabindex -1, igual que hace el
+     navegador al tabular. */
+  function modalFocusables(modal) {
+    return Array.prototype.filter.call(modal.querySelectorAll(MODAL_FOCO), function (el) {
+      return el.tabIndex >= 0 && (el.offsetWidth > 0 || el.offsetHeight > 0);
+    });
+  }
+
+  function abrirModal(modal, origen) {
+    if (!modal || modalAbierto) return;
+    modalAbierto = modal;
+    modalOrigen  = origen || null;
+    modal.hidden = false;
+
+    /* Al bloquear el scroll desaparece la barra y la pagina brincaria de
+       ancho; el padding ocupa exactamente ese hueco. */
+    var barra = window.innerWidth - document.documentElement.clientWidth;
+    document.body.classList.add('has-modal');
+    if (barra > 0) document.body.style.paddingRight = barra + 'px';
+
+    var primero = modal.querySelector('[data-modal-focus]') || modalFocusables(modal)[0];
+    if (primero) primero.focus();
+  }
+
+  function cerrarModal() {
+    if (!modalAbierto) return;
+    modalAbierto.hidden = true;
+    document.body.classList.remove('has-modal');
+    document.body.style.paddingRight = '';
+    /* El foco vuelve a quien abrio: si no, se va al inicio del documento
+       y quien navega con teclado pierde el lugar. */
+    if (modalOrigen && modalOrigen.focus) modalOrigen.focus();
+    modalAbierto = null;
+    modalOrigen  = null;
+  }
+
+  /* Un combobox abierto dentro del modal se come el clic al fondo y la
+     tecla Escape: cierra su lista primero, sin cerrar el modal. */
+  function modalTieneListaAbierta() {
+    return !!(modalAbierto && modalAbierto.querySelector('.tel-cc__list:not([hidden])'));
+  }
+
+  function initModals() {
+    /* Delegado en document: sumar un disparador es ponerle el atributo al
+       HTML, sin volver a tocar este archivo. */
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest) return;
+
+      var abre = e.target.closest('[data-open-modal]');
+      if (abre) {
+        var modal = document.getElementById(abre.getAttribute('data-open-modal'));
+        if (modal) {
+          e.preventDefault();
+          abrirModal(modal, abre);
+        }
+        return;
+      }
+
+      if (modalAbierto && e.target.closest('[data-close-modal]')) {
+        e.preventDefault();
+        cerrarModal();
+      }
+    });
+
+    /* Fondo: solo cuenta si el objetivo es el overlay mismo, no algo de
+       adentro. mousedown y no click para que arrastrar texto desde el
+       dialogo hasta el fondo no cierre. */
+    document.addEventListener('mousedown', function (e) {
+      if (modalAbierto && e.target === modalAbierto && !modalTieneListaAbierta()) {
+        cerrarModal();
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (!modalAbierto) return;
+
+      /* El combobox ya consumio la tecla (Escape cierra su lista). */
+      if (e.defaultPrevented) return;
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        cerrarModal();
+        return;
+      }
+
+      if (e.key !== 'Tab') return;
+
+      var foco = modalFocusables(modalAbierto);
+      if (!foco.length) return;
+      var primero = foco[0];
+      var ultimo  = foco[foco.length - 1];
+
+      if (e.shiftKey && document.activeElement === primero) {
+        e.preventDefault();
+        ultimo.focus();
+      } else if (!e.shiftKey && document.activeElement === ultimo) {
+        e.preventDefault();
+        primero.focus();
+      } else if (!modalAbierto.contains(document.activeElement)) {
+        e.preventDefault();
+        primero.focus();
+      }
+    });
+  }
+
   /* ── CONTACT FORM ──────────────────────────────────────────── */
   function initContactForm() {
     var form = document.getElementById('contact-form');
@@ -964,6 +1105,49 @@
           btn.disabled = false;
           alert('Hubo un error enviando el mensaje. Por favor intenta de nuevo.');
         });
+    });
+  }
+
+  /* ── VARIANTE DE CAMPAÑA (#ads) ────────────────────────────── */
+  /* La clase v-ads la pone un script inline en el <head>. Aqui solo se
+     evita que navegar por el nav reemplace el fragmento y borre #ads de la
+     URL: se hace el scroll a mano y se cancela la navegacion. Los href del
+     markup no cambian, asi que sin JS los enlaces siguen sirviendo. */
+  function initAdsNav() {
+    if (!document.documentElement.classList.contains('v-ads')) return;
+
+    /* El logo apunta a index.html, que recarga y deja la URL sin #ads. Se
+       reapunta al tope desde aqui y no desde el markup porque en la version
+       normal debe seguir llevando a la home; y sin este JS no hay variante,
+       asi que el href del HTML es justo el que corresponde a esa version. */
+    var logo = document.querySelector('.nav__brand');
+    if (logo) logo.setAttribute('href', '#inicio');
+
+    document.addEventListener('click', function (e) {
+      /* El CTA del nav abre el modal y ya llamo a preventDefault: no debe
+         ademas desplazar la pagina hasta la seccion de contacto. */
+      if (e.defaultPrevented) return;
+      if (!e.target.closest) return;
+
+      var enlace = e.target.closest('.nav__links a, .mobile-nav a, .nav__brand');
+      if (!enlace || enlace.hasAttribute('data-open-modal')) return;
+
+      var href = enlace.getAttribute('href') || '';
+      var corte = href.indexOf('#');
+      if (corte < 0) return;
+
+      /* Solo anclas de esta misma pagina; un '#seccion' de otro documento
+         debe navegar normal. */
+      var base = href.slice(0, corte);
+      if (base && base !== 'index.html' && base !== './index.html') return;
+
+      var destino = document.getElementById(href.slice(corte + 1));
+      if (!destino) return;
+
+      e.preventDefault();
+      /* Mismo punto de llegada que el salto nativo, para que la variante no
+         se sienta distinta de la version normal. */
+      destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }
 
@@ -1124,6 +1308,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     initAttribution();
     initTelFields();
+    initModals();
     initProgress();
     initNav();
     initMobile();
@@ -1134,6 +1319,7 @@
     initContactForm();
     initGallery();
     initActiveLink();
+    initAdsNav();
   });
 
 })();
