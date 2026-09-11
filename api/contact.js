@@ -8,7 +8,8 @@ const CRM_TIMEOUT_MS = 8000;
 const CRM_ENV_BY_FLOW = {
   contacto:    'CRM_URL_CONTACTO',
   calculadora: 'CRM_URL_CALCULADORA',
-  cotizacion:  'CRM_URL_COTIZACION'
+  cotizacion:  'CRM_URL_COTIZACION',
+  whatsapp:    'CRM_URL_WHATSAPP'
 };
 
 /* Un secreto por fuente, mismo mapeo rigido: si uno se filtra se revoca
@@ -16,13 +17,15 @@ const CRM_ENV_BY_FLOW = {
 const CRM_SECRET_ENV_BY_FLOW = {
   contacto:    'CRM_WEBHOOK_SECRET_CONTACTO',
   calculadora: 'CRM_WEBHOOK_SECRET_CALCULADORA',
-  cotizacion:  'CRM_WEBHOOK_SECRET_COTIZACION'
+  cotizacion:  'CRM_WEBHOOK_SECRET_COTIZACION',
+  whatsapp:    'CRM_WEBHOOK_SECRET_WHATSAPP'
 };
 
 const SUBJECT_BY_FLOW = {
   contacto:    'Nuevo lead',
   calculadora: 'Registro en calculadora',
-  cotizacion:  'Actualización de lead'
+  cotizacion:  'Actualización de lead',
+  whatsapp:    'Preregistro de WhatsApp'
 };
 
 function escapeHtml(str) {
@@ -42,9 +45,20 @@ function resolveFlow(body) {
   if (Object.prototype.hasOwnProperty.call(CRM_ENV_BY_FLOW, body.flow)) {
     return body.flow;
   }
-  const guess = (body.largo !== undefined && body.ancho !== undefined)
-    ? 'cotizacion'
-    : (Object.prototype.hasOwnProperty.call(body, 'mensaje') ? 'contacto' : 'calculadora');
+  /* WhatsApp primero: es el unico flujo que manda 'referencia' y no manda
+     'email'. Sin esta rama, un envio suyo sin flow caeria en 'calculadora'
+     y el lead se iria al webhook equivocado. */
+  let guess;
+  if (Object.prototype.hasOwnProperty.call(body, 'referencia') &&
+      !Object.prototype.hasOwnProperty.call(body, 'email')) {
+    guess = 'whatsapp';
+  } else if (body.largo !== undefined && body.ancho !== undefined) {
+    guess = 'cotizacion';
+  } else if (Object.prototype.hasOwnProperty.call(body, 'mensaje')) {
+    guess = 'contacto';
+  } else {
+    guess = 'calculadora';
+  }
   console.warn(`[contact] flow ausente o invalido (${JSON.stringify(body.flow)}); heuristica: ${guess}`);
   return guess;
 }
@@ -66,7 +80,14 @@ function buildCrmPayload(flow, body, attr) {
   put(payload, 'telefono', body.telefono);
   put(payload, 'email',    body.email);
   put(payload, 'mensaje',  body.mensaje);
-  payload.comms = body.comms ? 'Sí' : 'No';
+  put(payload, 'referencia', body.referencia);
+
+  /* En WhatsApp no hay casilla de consentimiento, asi que un 'No' se leeria
+     como que el usuario lo declino. La clave se omite en vez de mentir. */
+  if (flow !== 'whatsapp') {
+    payload.comms = body.comms ? 'Sí' : 'No';
+  }
+
   put(payload, 'gclid',    body.gclid);
 
   /* Atribucion, plana en la raiz y en los tres flujos: el webhook solo lee
@@ -235,11 +256,30 @@ function mailTitulo(texto) {
 }
 
 function buildEmailHtml(flow, body, crm, attr) {
-  const contacto = mailFila('Nombre', escapeHtml(body.nombre)) +
-    mailFila('Empresa', escapeHtml(body.empresa)) +
-    mailFila('Teléfono', escapeHtml(body.telefono)) +
-    mailFila('Correo', escapeHtml(body.email)) +
-    mailFila('Consentimiento', body.comms ? 'Sí' : 'No');
+  /* WhatsApp solo captura nombre y telefono. Las demas filas se omiten en
+     vez de salir vacias: una fila en blanco se lee como dato que falta, no
+     como campo que no aplica a este flujo. */
+  const esWhatsapp = flow === 'whatsapp';
+
+  let contacto = mailFila('Nombre', escapeHtml(body.nombre));
+  if (!esWhatsapp) contacto += mailFila('Empresa', escapeHtml(body.empresa));
+  contacto += mailFila('Teléfono', escapeHtml(body.telefono));
+  if (!esWhatsapp) {
+    contacto += mailFila('Correo', escapeHtml(body.email));
+    contacto += mailFila('Consentimiento', body.comms ? 'Sí' : 'No');
+  }
+
+  /* Destacada porque es lo unico que permite cruzar la conversacion de
+     WhatsApp con este lead. Se muestra por presencia y no por flujo: solo
+     este flujo la manda. */
+  const referenciaSeccion = body.referencia
+    ? mailSeccion(mailTitulo('Referencia') + `
+              <tr>
+                <td style="font-family:${MAIL_FUENTE};font-size:22px;line-height:1.3;font-weight:bold;color:${MAIL_TINTA};letter-spacing:0.02em;">
+                  ${escapeHtml(body.referencia)}
+                </td>
+              </tr>`, '#F9FAFB')
+    : '';
 
   const acciones = mailAcciones(body.telefono, body.email);
   const accionesSeccion = acciones
@@ -305,7 +345,7 @@ function buildEmailHtml(flow, body, crm, attr) {
             <div style="font-family:${MAIL_FUENTE};font-size:26px;line-height:1.2;font-weight:bold;color:#FFFFFF;">Steel Paint</div>
             <div style="font-family:${MAIL_FUENTE};font-size:14px;line-height:1.4;color:#DCFCE7;padding-top:4px;">${escapeHtml(SUBJECT_BY_FLOW[flow])}</div>
           </td>
-        </tr>${mailSeccion(contacto)}${accionesSeccion}${mensajeSeccion}${cotizacionSeccion}${mailSeccion(origen, '#F9FAFB')}${crmSeccion}
+        </tr>${mailSeccion(contacto)}${referenciaSeccion}${accionesSeccion}${mensajeSeccion}${cotizacionSeccion}${mailSeccion(origen, '#F9FAFB')}${crmSeccion}
         <tr>
           <td style="padding:18px 24px;border-top:1px solid ${MAIL_BORDE};font-family:${MAIL_FUENTE};font-size:12px;line-height:1.5;color:${MAIL_GRIS};">
             Enviado desde steel-paint.com.mx

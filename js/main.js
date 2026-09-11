@@ -1151,6 +1151,151 @@
     });
   }
 
+  /* ── PREREGISTRO DE WHATSAPP ───────────────────────────────── */
+  const WA_NUMERO = '528180294154';
+  /* Sin O, 0, I ni 1: el folio se dicta por telefono y se teclea a mano. */
+  const WA_ALFABETO = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const WA_LARGO    = 6;
+
+  function waReferencia() {
+    var out = '';
+    for (var i = 0; i < WA_LARGO; i++) {
+      out += WA_ALFABETO.charAt(Math.floor(Math.random() * WA_ALFABETO.length));
+    }
+    return out;
+  }
+
+  function waEnlace(nombre, referencia) {
+    var texto = 'Hola, soy ' + nombre + '. Me interesa cotizar pintura electrostática. Ref: ' + referencia;
+    return 'https://wa.me/' + WA_NUMERO + '?text=' + encodeURIComponent(texto);
+  }
+
+  function initWhatsappForm() {
+    var form = document.getElementById('whatsapp-form');
+    if (!form) return;
+
+    var paso1 = document.getElementById('wa-paso-1');
+    var paso2 = document.getElementById('wa-paso-2');
+    var abrir = document.getElementById('wa-abrir');
+    var errEl = document.getElementById('whatsapp-error');
+
+    function mostrarPaso2(enlace) {
+      if (abrir) abrir.setAttribute('href', enlace);
+      if (paso1) paso1.hidden = true;
+      if (paso2) {
+        paso2.hidden = false;
+        /* El foco estaba en un control que se acaba de ocultar; se lleva al
+           unico boton que sigue importando. */
+        if (abrir) abrir.focus();
+      }
+    }
+
+    /* Al reabrir se vuelve al paso 1: si no, quien entra por segunda vez se
+       encuentra la pantalla final de la vez anterior. No se limpia el
+       formulario: el combobox guarda el pais en un dataset y un reset()
+       dejaria el texto y el codigo diciendo cosas distintas. */
+    function reiniciar() {
+      if (paso1) paso1.hidden = false;
+      if (paso2) paso2.hidden = true;
+      if (errEl) errEl.style.display = 'none';
+    }
+
+    document.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('[data-open-modal="whatsapp-modal"]')) reiniciar();
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      var gv = function (id) {
+        var el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+      };
+      var nombre   = gv('w-nombre');
+      var telefono = gv('w-telefono');
+      var digitos  = telefono.replace(/\D/g, '');
+
+      var errores = [];
+      if (!nombre)  errores.push('Ingresa tu nombre.');
+      if (!digitos) errores.push('Ingresa tu teléfono.');
+      if (errores.length) {
+        if (errEl) {
+          errEl.innerHTML = errores.join('<br>');
+          errEl.style.display = 'block';
+        }
+        return;
+      }
+      if (errEl) errEl.style.display = 'none';
+
+      var referencia = waReferencia();
+      var enlace     = waEnlace(nombre, referencia);
+
+      /* La pestaña se reserva aqui, dentro del gesto del usuario: abrirla
+         despues de la respuesta del backend la convierte en un popup y el
+         navegador la bloquea. Se navega cuando toca. */
+      var pestana = null;
+      try { pestana = window.open('', '_blank'); } catch (err) { pestana = null; }
+
+      function abrirWhatsapp() {
+        if (pestana && !pestana.closed) {
+          try {
+            /* Todavia es about:blank y del mismo origen: se le corta el
+               acceso a esta ventana antes de mandarla a un sitio ajeno. */
+            pestana.opener = null;
+            pestana.location.href = enlace;
+            return;
+          } catch (err) { /* se cayo el handle: se intenta de nuevo abajo */ }
+        }
+        try { window.open(enlace, '_blank', 'noopener'); } catch (err) { /* no-op */ }
+      }
+
+      var hp  = document.getElementById('w-sp-website');
+      /* Se lee recortado, igual que lo evalua el backend. */
+      var honeypot = hp ? hp.value.trim() : '';
+
+      var btn = form.querySelector('[type="submit"]');
+      var textoOriginal = btn.innerHTML;
+      btn.textContent = 'Generando...';
+      btn.disabled    = true;
+
+      fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          flow:        'whatsapp',
+          nombre:      nombre,
+          telefono:    composeTel('w-telefono'),
+          referencia:  referencia,
+          attribution: window.SP_getAttribution
+            ? window.SP_getAttribution()
+            : { first: null, last: null },
+          sp_website:  hp ? hp.value : ''
+        })
+      })
+        .then(function (res) {
+          if (!res.ok) throw new Error('Request failed');
+          /* El backend descarta al bot en silencio y contesta 200, asi que
+             un honeypot lleno llega hasta aqui indistinguible de un envio
+             bueno. Sin esta guarda, la conversion en Ads contaria bots. */
+          if (honeypot) return;
+          /* Solo con el registro confirmado: el evento debe contar
+             preregistros guardados, no intentos. */
+          window.dataLayer = window.dataLayer || [];
+          dataLayer.push({ event: 'whatsapp_preregistro' });
+        })
+        .catch(function () {
+          /* Sin evento, pero la conversacion sigue: perder el registro es
+             mejor que perder el lead. */
+        })
+        .then(function () {
+          btn.innerHTML = textoOriginal;
+          btn.disabled  = false;
+          abrirWhatsapp();
+          mostrarPaso2(enlace);
+        });
+    });
+  }
+
   /* ── ACTIVE NAV LINK ───────────────────────────────────────── */
   function initActiveLink() {
     var page = window.location.pathname.split('/').pop() || 'index.html';
@@ -1376,6 +1521,9 @@
   document.addEventListener('DOMContentLoaded', function () {
     initAttribution();
     initTelFields();
+    /* Antes que initModals: el reinicio de pasos debe correr antes de que el
+       modal se abra, para que el foco caiga en un campo ya visible. */
+    initWhatsappForm();
     initModals();
     initProgress();
     initNav();
