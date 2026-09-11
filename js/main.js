@@ -991,6 +991,14 @@
     });
   }
 
+  /* El teclado virtual de iOS encoge el viewport visual sin tocar el de
+     layout, asi que el alto del modal se toma de aqui y no del CSS. */
+  function ajustarModalAlTeclado() {
+    if (!modalAbierto || !window.visualViewport) return;
+    modalAbierto.style.setProperty('--vv-alto', window.visualViewport.height + 'px');
+    modalAbierto.style.setProperty('--vv-top', (window.visualViewport.offsetTop || 0) + 'px');
+  }
+
   function abrirModal(modal, origen) {
     if (!modal || modalAbierto) return;
     modalAbierto = modal;
@@ -1003,12 +1011,24 @@
     document.body.classList.add('has-modal');
     if (barra > 0) document.body.style.paddingRight = barra + 'px';
 
+    ajustarModalAlTeclado();
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', ajustarModalAlTeclado);
+      window.visualViewport.addEventListener('scroll', ajustarModalAlTeclado);
+    }
+
     var primero = modal.querySelector('[data-modal-focus]') || modalFocusables(modal)[0];
     if (primero) primero.focus();
   }
 
   function cerrarModal() {
     if (!modalAbierto) return;
+    if (window.visualViewport) {
+      window.visualViewport.removeEventListener('resize', ajustarModalAlTeclado);
+      window.visualViewport.removeEventListener('scroll', ajustarModalAlTeclado);
+    }
+    modalAbierto.style.removeProperty('--vv-alto');
+    modalAbierto.style.removeProperty('--vv-top');
     modalAbierto.hidden = true;
     document.body.classList.remove('has-modal');
     document.body.style.paddingRight = '';

@@ -370,6 +370,16 @@ p  { color: var(--text-2); line-height: 1.75; }
 .hero__cta-contacto { display: none; line-height: 1.6; }
 @media (max-width: 768px) {
   .hero__cta-contacto { display: inline-flex; }
+  /* Una sola accion en el hero movil: las otras dos se leian como ruido al
+     lado de la que de verdad importa. Ambas siguen a un toque de distancia,
+     la calculadora desde el menu y el proceso con solo bajar. */
+  :root:not(.v-ads) .hero__cta-calc,
+  :root:not(.v-ads) .hero__cta-proceso { display: none; }
+  /* Hueco para el flotante, que vive en la esquina inferior derecha: sin el,
+     a 380px el CTA de ancho completo le queda justo debajo. Se aparta el CTA
+     y no el flotante porque, para librarlo desde la esquina, habria que
+     subirlo unos 120px y ahi deja de leerse como boton flotante. */
+  :root:not(.v-ads) .hero__actions { margin-bottom: 5rem; }
 }
 /* La variante #ads ya tiene su propio CTA de cotizacion: no se toca. */
 .v-ads .hero__cta-contacto { display: none; }
@@ -380,7 +390,6 @@ p  { color: var(--text-2); line-height: 1.75; }
    "Que hacemos?". El resto es compactar sin tocar tipografias.
    Acotado a :root:not(.v-ads) para no alterar la variante. */
 @media (max-width: 560px) {
-  :root:not(.v-ads) .hero__cta-proceso { display: none; }
   :root:not(.v-ads) .hero__actions { gap: 0.75rem; }
   /* 2.5rem de separacion es holgado a esta anchura; recortarlo da margen
      al pliegue sin tocar tamaños de letra ni interlineado. Sin acotar a la
@@ -1021,9 +1030,18 @@ p  { color: var(--text-2); line-height: 1.75; }
 /* ── MODAL ──────────────────────────────────────────────────── */
 /* Sin transform en el dialogo: un ancestro transformado se vuelve el
    bloque contenedor de position:fixed y recortaria la lista de paises. */
+/* El alto sale del visualViewport, no de inset:0 ni de vh: en iOS el teclado
+   encoge el viewport visual pero NO el de layout, asi que con vh el dialogo
+   seguia midiendo la pantalla entera y su mitad inferior --con el boton de
+   enviar, verde y de ancho completo-- quedaba tendida bajo el teclado. JS
+   pone --vv-alto y --vv-top mientras el modal esta abierto; el 100% es el
+   respaldo para navegadores sin visualViewport. */
 .modal {
   position: fixed;
-  inset: 0;
+  top: var(--vv-top, 0px);
+  left: 0;
+  right: 0;
+  height: var(--vv-alto, 100%);
   z-index: 200;
   display: flex;
   align-items: center;
@@ -1037,7 +1055,8 @@ p  { color: var(--text-2); line-height: 1.75; }
   flex-direction: column;
   width: 100%;
   max-width: 720px;
-  max-height: calc(100vh - 3rem);
+  /* 100% del overlay, que ya mide el area visible; con vh no encogia. */
+  max-height: 100%;
   background: var(--bg-1);
   border: 1px solid var(--border);
   border-radius: var(--rl);
@@ -1068,6 +1087,11 @@ p  { color: var(--text-2); line-height: 1.75; }
 .modal__close:hover { color: var(--text-1); border-color: var(--text-3); }
 .modal__close .icon { width: 14px; height: 14px; }
 .modal__body {
+  /* Es la zona que se encoge y scrollea: sin flex:1 el cuerpo crecia con su
+     contenido y el dialogo lo recortaba, dejando el final del formulario
+     fuera de alcance en vez de dentro de un area con scroll. */
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 0 1.75rem 1.75rem;
   overflow-y: auto;
 }
