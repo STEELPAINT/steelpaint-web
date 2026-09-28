@@ -1495,6 +1495,15 @@ body.has-modal .wa-fab { display: none; }
 .legal-body ul { padding-left: 1.5rem; margin-bottom: 1rem; }
 .legal-body ul li { font-size: 0.95rem; color: var(--text-2); margin-bottom: 0.4rem; list-style: disc; }
 
+/* Tablas dentro de notas: el contenedor .table-wrap da scroll horizontal en móvil */
+.legal-body .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 1.5rem 0; border: 1px solid var(--border); border-radius: var(--r); background: var(--bg-2); }
+.legal-body table { width: 100%; min-width: 680px; border-collapse: collapse; font-size: 0.85rem; }
+.legal-body caption { caption-side: top; text-align: left; padding: 0.85rem 1rem; color: var(--text-2); font-size: 0.8rem; }
+.legal-body th, .legal-body td { padding: 0.75rem 1rem; text-align: left; vertical-align: top; color: var(--text-2); border-bottom: 1px solid var(--border); line-height: 1.5; }
+.legal-body thead th { color: var(--text-1); background: var(--bg-3); font-weight: 600; white-space: nowrap; }
+.legal-body tbody th { color: var(--text-1); font-weight: 600; white-space: nowrap; }
+.legal-body tbody tr:last-child th, .legal-body tbody tr:last-child td { border-bottom: 0; }
+
 /* ── SUCCESS STATE ───────────────────────────────────────────── */
 .form-success {
   display: none;
