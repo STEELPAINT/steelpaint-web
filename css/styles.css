@@ -1495,6 +1495,10 @@ body.has-modal .wa-fab { display: none; }
 .legal-body ul { padding-left: 1.5rem; margin-bottom: 1rem; }
 .legal-body ul li { font-size: 0.95rem; color: var(--text-2); margin-bottom: 0.4rem; list-style: disc; }
 
+/* Enlaces dentro de notas: visibles frente al texto (solo <article>, no afecta legales.html) */
+article.legal-body a:not(.btn) { color: var(--g-400); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color var(--t); }
+article.legal-body a:not(.btn):hover { color: var(--g-300); text-decoration-thickness: 2px; }
+
 /* Tablas dentro de notas: el contenedor .table-wrap da scroll horizontal en móvil */
 .legal-body .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 1.5rem 0; border: 1px solid var(--border); border-radius: var(--r); background: var(--bg-2); }
 .legal-body table { width: 100%; min-width: 680px; border-collapse: collapse; font-size: 0.85rem; }
